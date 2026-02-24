@@ -8,19 +8,27 @@
     "net8.0-windows7.0": []
   },
   "packageFolders": {
-    "C:\\Users\\Abdo Halem\\.nuget\\packages\\": {}
+    "C:\\Users\\ECC\\.nuget\\packages\\": {},
+    "E:\\Dev express\\Components\\Offline Packages": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Engineering\\Software_Engineering\\ITI_PD_CRM\\.NET\\C#\\Final_Project\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
+      "projectUniqueName": "D:\\ITI - PD\\Csharp\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
       "projectName": "Client_UI",
-      "projectPath": "D:\\Engineering\\Software_Engineering\\ITI_PD_CRM\\.NET\\C#\\Final_Project\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
-      "packagesPath": "C:\\Users\\Abdo Halem\\.nuget\\packages\\",
-      "outputPath": "D:\\Engineering\\Software_Engineering\\ITI_PD_CRM\\.NET\\C#\\Final_Project\\PD46_Domino_Project\\Domino_Project\\Client_UI\\obj\\",
+      "projectPath": "D:\\ITI - PD\\Csharp\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
+      "packagesPath": "C:\\Users\\ECC\\.nuget\\packages\\",
+      "outputPath": "D:\\ITI - PD\\Csharp\\PD46_Domino_Project\\Domino_Project\\Client_UI\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "E:\\Dev express\\Components\\Offline Packages",
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\Abdo Halem\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\ECC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 23.2.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -28,6 +36,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "E:\\Dev express\\Components\\System\\Components\\Packages": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -70,7 +79,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.311/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
