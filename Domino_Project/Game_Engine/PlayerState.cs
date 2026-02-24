@@ -56,5 +56,10 @@ namespace Game_Engine
         {
             return Cards.Any(card => card.HasValue(leftValue) || card.HasValue(rightValue));
         }
+
+        public void AddToScore(int points)
+        {
+            TotalScore += points;
+        }
     }
 }
