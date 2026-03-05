@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj": {}
+    "D:\\PC\\ITI\\Courses\\C#\\Project\\Domino\\Git-hub\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj": {}
   },
   "projects": {
-    "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj": {
+    "D:\\PC\\ITI\\Courses\\C#\\Project\\Domino\\Git-hub\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj",
+        "projectUniqueName": "D:\\PC\\ITI\\Courses\\C#\\Project\\Domino\\Git-hub\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj",
         "projectName": "Game_Engine",
-        "projectPath": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj",
-        "packagesPath": "C:\\Users\\oooam\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\obj\\",
+        "projectPath": "D:\\PC\\ITI\\Courses\\C#\\Project\\Domino\\Git-hub\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj",
+        "packagesPath": "C:\\Users\\ahmed\\.nuget\\packages\\",
+        "outputPath": "D:\\PC\\ITI\\Courses\\C#\\Project\\Domino\\Git-hub\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\oooam\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\ahmed\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -44,7 +44,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net8.0": {
@@ -60,26 +60,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.24, 8.0.24]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.24, 8.0.24]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.24, 8.0.24]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200-preview.0.26103.119/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

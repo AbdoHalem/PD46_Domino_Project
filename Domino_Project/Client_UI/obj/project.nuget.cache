@@ -1,13 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "JDLhr4wN55M=",
+  "dgSpecHash": "itkOtC79O28=",
   "success": true,
-  "projectFilePath": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
-  "expectedPackageFiles": [
-    "C:\\Users\\oooam\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.24\\microsoft.windowsdesktop.app.ref.8.0.24.nupkg.sha512",
-    "C:\\Users\\oooam\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.24\\microsoft.netcore.app.ref.8.0.24.nupkg.sha512",
-    "C:\\Users\\oooam\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.24\\microsoft.aspnetcore.app.ref.8.0.24.nupkg.sha512",
-    "C:\\Users\\oooam\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.24\\microsoft.netcore.app.host.win-x64.8.0.24.nupkg.sha512"
-  ],
+  "projectFilePath": "D:\\PC\\ITI\\Courses\\C#\\Project\\Domino\\Git-hub\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
+  "expectedPackageFiles": [],
   "logs": []
 }
