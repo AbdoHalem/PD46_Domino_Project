@@ -61,5 +61,9 @@ namespace Game_Engine
         {
             TotalScore += points;
         }
+        public void ClearCards()
+        {
+            Cards.Clear();
+        }
     }
 }

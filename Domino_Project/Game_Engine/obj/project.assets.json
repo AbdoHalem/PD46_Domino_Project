@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\oooam\\Downloads\\PD46_Domino_Project\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj",
+      "projectUniqueName": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj",
       "projectName": "Game_Engine",
-      "projectPath": "C:\\Users\\oooam\\Downloads\\PD46_Domino_Project\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj",
+      "projectPath": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj",
       "packagesPath": "C:\\Users\\oooam\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\oooam\\Downloads\\PD46_Domino_Project\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\obj\\",
+      "outputPath": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

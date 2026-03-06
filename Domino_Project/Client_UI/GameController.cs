@@ -168,11 +168,14 @@ namespace Client_UI
                 case GameConstants.EventRoundEnded:
                     HandleRoundEnded(e.Payload);
                     break;
-
-                // ── Game over ─────────────────────────────────────────
-                case GameConstants.EventGameOver:
-                    HandleGameOver(e.Payload);
+                    // ── Server deals fresh hands for a new round ──────────
+                case GameConstants.EventTileDealt:
+                    HandleNewRoundDealt(e.Payload);
                     break;
+                    // ── Game over ─────────────────────────────────────────
+                case GameConstants.EventGameOver:
+                HandleGameOver(e.Payload);
+                break;
 
                 // ── Player disconnected mid-game ──────────────────────
                 case GameConstants.EventPlayerLeft:
@@ -292,16 +295,45 @@ namespace Client_UI
             var resp = p.Deserialize<RoundEndedResponse>(JsonOpts.Default);
             if (resp == null) return;
 
+            // 1. Update the actual UI score state before showing the popup
+            foreach (var score in resp.Scores)
+            {
+                if (score.PlayerName == _playerName)
+                {
+                    _gameForm.UpdateLocalScore(score.TotalScore); // Update your score
+                }
+                else
+                {
+                    var opp = _others.FirstOrDefault(o => o.Name == score.PlayerName);
+                    if (opp != null) opp.Points = score.TotalScore; // Update opponent scores
+                }
+            }
+
+            // 2. Show the popup (We DO NOT clear the board here anymore)
             var pts = resp.Scores.ToDictionary(s => s.PlayerName, s => s.TotalScore);
             _gameForm.ShowRoundResult(pts);
+        }
+        private void HandleNewRoundDealt(JsonElement p)
+        {
+            var resp = p.Deserialize<PlayerHandResponse>(JsonOpts.Default);
+            if (resp == null) return;
 
-            if (!resp.GameOver)
+            _myHand = resp.Hand
+                .Select(t => new DominoTile(t.Left, t.Right))
+                .ToList();
+
+            _boneyard = resp.BoneyardCount;
+            _isMyTurn = (resp.FirstTurn == _playerName);
+
+            foreach (var o in _others)
             {
-                // Clear board for next round; server will push new hands
-                _board.Clear();
-                _myHand.Clear();
-                foreach (var o in _others) o.CardCount = 0;
+                o.CardCount = 7;
             }
+
+            // THE FIX: Wipe the board here, exactly when the new round begins!
+            _board.Clear();
+
+            UpdateTurnState();
         }
 
         private void HandleGameOver(JsonElement p)

@@ -107,6 +107,12 @@ namespace Game_Engine
         // Resets the board and deals new hands for another round
         public void StartNewRound()
         {
+            // 1. NEW: Wipe everyone's hands before dealing!
+            foreach (var player in Players)
+            {
+                player.ClearCards();
+            }
+
             Board = new BoardState();
             Board.InitializeBankCards();
             Board.AssignPlayerCards(Players);
@@ -114,7 +120,7 @@ namespace Game_Engine
             Board.BankCards.Clear();
 
             CurrentPlayerIndex = DetermineFirstPlayer();
-            IsGameOver= false;
+            IsGameOver = false;
         }
 
         // for UI use

@@ -43,6 +43,7 @@ namespace Client_UI
         private bool _isWatcher = false;
         private string _localPlayerName = "You";
         private int _selectedIndex = -1;
+        private int _myPoints = 0;
 
         // ── UI Controls ───────────────────────────────────────────────────
         private PictureBox picBoard;
@@ -374,7 +375,7 @@ namespace Client_UI
             g.DrawString("Scoreboard", new Font("Segoe UI", 12, FontStyle.Bold), Brushes.White, 10, 10);
             g.DrawLine(new Pen(Color.FromArgb(80, 255, 255, 255)), 10, 36, 220, 36);
 
-            DrawScoreRow(g, _localPlayerName + " (You)", 0, _myHand.Count, _isMyTurn, 50);
+            DrawScoreRow(g, _localPlayerName + " (You)", _myPoints, _myHand.Count, _isMyTurn, 50);
             for (int i = 0; i < _otherPlayers.Count; i++)
                 DrawScoreRow(g, _otherPlayers[i].Name, _otherPlayers[i].Points,
                              _otherPlayers[i].CardCount, _otherPlayers[i].IsActive, 50 + (i + 1) * 62);
@@ -654,6 +655,12 @@ namespace Client_UI
             if (MessageBox.Show("Leave the game?", "Quit",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 LeaveGameRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void UpdateLocalScore(int pts)
+        {
+            _myPoints = pts;
+            pnlScore.Invalidate();
         }
 
         private void InitializeComponent2() { }

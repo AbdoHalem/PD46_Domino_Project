@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "YIv4j8afFJk=",
+  "dgSpecHash": "TVtJiTVbGYs=",
   "success": true,
-  "projectFilePath": "C:\\Users\\oooam\\Downloads\\PD46_Domino_Project\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
+  "projectFilePath": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\oooam\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.24\\microsoft.windowsdesktop.app.ref.8.0.24.nupkg.sha512",
     "C:\\Users\\oooam\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.24\\microsoft.netcore.app.ref.8.0.24.nupkg.sha512",

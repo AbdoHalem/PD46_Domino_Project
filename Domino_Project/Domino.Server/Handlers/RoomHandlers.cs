@@ -151,6 +151,7 @@ namespace Domino.Server.Handlers
         }
 
         // ── Player signals ready to play ──────────────────────────────
+        // ── Player signals ready to play ──────────────────────────────
         [MessageRoute(GameConstants.ActionReadyUp)]
         public async Task HandleReadyUpAsync(PlayerConnection player, JsonElement payload)
         {
@@ -161,7 +162,6 @@ namespace Domino.Server.Handlers
             if (record == null || !record.IsReady) return;
 
             // Only the room owner can trigger game start (or you can auto-start when full)
-            // Here we auto-start once the room hits ≥ 2 and is full OR the owner readied up
             bool ownerReadied = player.ConnectionId == record.OwnerId;
             bool roomFull = record.IsFull;
 
@@ -180,6 +180,11 @@ namespace Domino.Server.Handlers
 
             engine.OnRoundEnded += async (winnerName) =>
             {
+                // ── THE FIX: Add a 250ms delay to prevent race conditions ──
+                // This gives MatchHandlers time to broadcast the final DominoPlayed event 
+                // BEFORE we wipe the board and distribute the new cards.
+                await Task.Delay(250);
+
                 var roundResp = new RoundEndedResponse
                 {
                     RoundWinner = winnerName,
@@ -192,6 +197,39 @@ namespace Domino.Server.Handlers
                 };
                 await _groupManager.BroadcastToGroupAsync(roomGroup,
                     Envelope(GameConstants.EventRoundEnded, roundResp));
+
+                // ── Deal new hands if the match continues ──────────────
+                if (!engine.IsGameOver)
+                {
+                    // Trigger the engine to clear old cards, shuffle the bank, and deal!
+                    engine.StartNewRound();
+
+                    foreach (var kvp in record.Players)
+                    {
+                        string connId = kvp.Key;
+                        string pName = kvp.Value;
+
+                        var pState = engine.Players.FirstOrDefault(p => p.PlayerName == pName);
+                        if (pState == null) continue;
+
+                        var conn = GetConnectionFromGroup(roomGroup, connId);
+                        if (conn == null) continue;
+
+                        var hand = pState.Cards
+                            .Select(t => new TileDto { Left = t.LeftSide, Right = t.RightSide })
+                            .ToList();
+
+                        // Send the EventTileDealt message to update their UI
+                        await conn.SendMessageAsync(Envelope(GameConstants.EventTileDealt,
+                            new PlayerHandResponse
+                            {
+                                PlayerName = pName,
+                                Hand = hand,
+                                BoneyardCount = engine.Boneyard.Count,
+                                FirstTurn = engine.CurrentPlayer.PlayerName
+                            }));
+                    }
+                }
             };
 
             engine.OnGameOver += async (winnerName) =>
@@ -211,7 +249,7 @@ namespace Domino.Server.Handlers
                 _gameManager.EndGame(roomId);
             };
 
-            // Send each player their private hand
+            // Send each player their private hand for the FIRST round
             foreach (var kvp in record.Players)
             {
                 string connId = kvp.Key;

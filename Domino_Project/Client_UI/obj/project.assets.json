@@ -49,11 +49,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\oooam\\Downloads\\PD46_Domino_Project\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
+      "projectUniqueName": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
       "projectName": "Client_UI",
-      "projectPath": "C:\\Users\\oooam\\Downloads\\PD46_Domino_Project\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
+      "projectPath": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
       "packagesPath": "C:\\Users\\oooam\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\oooam\\Downloads\\PD46_Domino_Project\\PD46_Domino_Project\\Domino_Project\\Client_UI\\obj\\",
+      "outputPath": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Client_UI\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -74,11 +74,11 @@
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
           "projectReferences": {
-            "C:\\Users\\oooam\\Downloads\\PD46_Domino_Project\\PD46_Domino_Project\\Domino_Project\\Domino.Shared\\Domino.Shared.csproj": {
-              "projectPath": "C:\\Users\\oooam\\Downloads\\PD46_Domino_Project\\PD46_Domino_Project\\Domino_Project\\Domino.Shared\\Domino.Shared.csproj"
+            "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Domino.Shared\\Domino.Shared.csproj": {
+              "projectPath": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Domino.Shared\\Domino.Shared.csproj"
             },
-            "C:\\Users\\oooam\\Downloads\\PD46_Domino_Project\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj": {
-              "projectPath": "C:\\Users\\oooam\\Downloads\\PD46_Domino_Project\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj"
+            "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj": {
+              "projectPath": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Game_Engine\\Game_Engine.csproj"
             }
           }
         }
