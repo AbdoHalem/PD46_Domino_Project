@@ -8,23 +8,26 @@
     "net8.0": []
   },
   "packageFolders": {
-    "C:\\Users\\ahmed\\.nuget\\packages\\": {},
+    "C:\\Users\\ECC\\.nuget\\packages\\": {},
+    "E:\\Dev express\\Components\\Offline Packages": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\PC\\ITI\\Courses\\C#\\Project\\Domino\\Git-hub\\PD46_Domino_Project\\Domino_Project\\Server_Side\\Server_Side.csproj",
+      "projectUniqueName": "D:\\ITI - PD\\PD46_Domino_Project\\Domino_Project\\Server_Side\\Server_Side.csproj",
       "projectName": "Server_Side",
-      "projectPath": "D:\\PC\\ITI\\Courses\\C#\\Project\\Domino\\Git-hub\\PD46_Domino_Project\\Domino_Project\\Server_Side\\Server_Side.csproj",
-      "packagesPath": "C:\\Users\\ahmed\\.nuget\\packages\\",
-      "outputPath": "D:\\PC\\ITI\\Courses\\C#\\Project\\Domino\\Git-hub\\PD46_Domino_Project\\Domino_Project\\Server_Side\\obj\\",
+      "projectPath": "D:\\ITI - PD\\PD46_Domino_Project\\Domino_Project\\Server_Side\\Server_Side.csproj",
+      "packagesPath": "C:\\Users\\ECC\\.nuget\\packages\\",
+      "outputPath": "D:\\ITI - PD\\PD46_Domino_Project\\Domino_Project\\Server_Side\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
+        "E:\\Dev express\\Components\\Offline Packages",
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\ahmed\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\ECC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 23.2.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -33,6 +36,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "E:\\Dev express\\Components\\System\\Components\\Packages": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -51,7 +55,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "10.0.200"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
@@ -72,7 +76,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200-preview.0.26103.119/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

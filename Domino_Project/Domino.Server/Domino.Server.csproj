@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Connection.Engine\Connection.Engine.csproj" />
+    <ProjectReference Include="..\Domino.Shared\Domino.Shared.csproj" />
+    <ProjectReference Include="..\Game_Engine\Game_Engine.csproj" />
+  </ItemGroup>
+
+</Project>

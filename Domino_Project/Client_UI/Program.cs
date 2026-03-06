@@ -1,17 +1,17 @@
+// =====================================================================
+//  FILE: Program.cs  (Client_UI)
+//  FIX: Was launching Lobby directly (bypassing Login and server conn).
+//       Now launches Login, which chains to LobbyForm after auth.
+// =====================================================================
 namespace Client_UI
 {
     internal static class Program
     {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Lobby());
+            Application.Run(new Login());   // FIX: was `new Lobby()`
         }
     }
 }

@@ -17,7 +17,7 @@ using System.Linq;
 using System.Windows.Forms;
 #nullable disable
 
-namespace DominoGame
+namespace Client_UI
 {
     public partial class GameForm : Form
     {
@@ -118,7 +118,7 @@ namespace DominoGame
 
         public GameForm()
         {
-            InitializeComponent();
+            InitializeComponent2();
             BuildLayout();
             SetupAnimation();
         }
@@ -656,7 +656,7 @@ namespace DominoGame
                 LeaveGameRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private void InitializeComponent() { }
+        private void InitializeComponent2() { }
     }
 
     // ================================================================
