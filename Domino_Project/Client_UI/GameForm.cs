@@ -1,15 +1,4 @@
-﻿// ================================================================
-//  FILE: GameForm.cs
-//  TASK 3 – Game Board GUI (WinForms)
-//  Author: Member 3
-//
-//  This file is the entire game board window.
-//  It draws tiles, the board, opponent hands, and the scoreboard.
-//  It fires events when the player acts, and exposes public methods
-//  for the server to push game state into the UI.
-// ================================================================
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -139,7 +128,7 @@ namespace Client_UI
 
             lblStatus = new Label
             {
-                Text = "Waiting for game...",
+                Text = "Waiting game...",
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 13, FontStyle.Bold),
                 AutoSize = true,

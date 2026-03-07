@@ -1,156 +1,178 @@
-Domino Multiplayer Game
+# 🁣 Domino — Real-Time Multiplayer Game
 
-A real-time, multiplayer Domino game built with C# .NET 8.0, featuring a custom TCP socket server, WinForms client, and a server-authoritative game engine.
-🏗 Architecture
+A fully server-authoritative, real-time multiplayer Domino game built on a custom TCP socket infrastructure. Engineered in **C# / .NET 8.0** with a WinForms client, featuring a purpose-built game engine, dynamic lobby system, spectator mode, and resilient disconnect handling.
 
-The project follows a robust Client-Server architecture separated into four main projects: Client_UI, Server_Side, Game_Engine, and Domino.Shared.
+---
 
-    Network Layer (Custom TCP): The server uses a low-level TcpListener with length-prefixed framing to handle real-time socket connections, solving TCP fragmentation natively.
+## Tech Stack
 
-    Routing Layer: Incoming JSON messages are dynamically mapped to specific handler methods using a custom MessageRouter and [MessageRoute] reflection attributes.
+| Layer | Technology |
+|---|---|
+| Runtime | .NET 8.0 / C# |
+| Networking | Custom TCP (`TcpListener`, length-prefixed framing) |
+| Serialization | JSON over raw sockets |
+| Client UI | WinForms (MVC-like pattern) |
+| Game Logic | Network-agnostic `GameEngine` library |
 
-    State Management: The server maintains state across three main managers:
+---
 
-        ConnectionRegistry: Tracks active TCP sockets.
+## Architecture Overview
 
-        GroupManager: A Pub/Sub system for broadcasting messages to specific rooms or the global lobby.
+The solution is divided into four focused projects:
 
-        GameManager: Manages room lifecycles, player registries, and maps rooms to their isolated GameEngine instances.
+```
+Domino.sln
+├── Client_UI        → WinForms frontend + GameController mediator
+├── Server_Side      → TCP server, message routing, state managers
+├── Game_Engine      → Pure game logic: rules, board state, round lifecycle
+└── Domino.Shared    → Shared message contracts (DTOs, enums)
+```
 
-    Game Engine: A purely logical, network-agnostic engine that strictly validates all rules (turn order, tile possession, valid placements) before applying state changes.
+### Network Layer
+The server uses a raw `TcpListener` with **length-prefixed message framing**, solving TCP stream fragmentation without a third-party library. Incoming byte streams are decoded into JSON, then dispatched through a `MessageRouter` that uses **reflection-based `[MessageRoute]` attributes** to map action strings to handler methods — eliminating fragile switch statements.
 
-    Client UI (WinForms): Uses an MVC-like approach where GameController acts as the mediator. It listens to raw TCP events, updates local state mirrors, and pushes UI updates to the pure-rendering GameForm.
+### State Management
+Three thread-safe managers govern all server-side state:
 
-✨ Available Features
+- **`ConnectionRegistry`** — Tracks active TCP socket sessions by player identity.
+- **`GroupManager`** — A Pub/Sub broadcast system for rooms and the global lobby.
+- **`GameManager`** — Owns room lifecycles, player registries, and the 1-to-1 mapping of rooms to isolated `GameEngine` instances.
 
-    Real-time Multiplayer: Supports 2 to 4 players per room.
+### Game Engine
+`GameEngine` is deliberately **network-agnostic** — it has no knowledge of sockets, players, or clients. Every mutation (play, draw, pass) passes through `RulesValidator` before any state change is applied, guaranteeing that cheating or out-of-order messages cannot corrupt game state.
 
-    Dynamic Lobby System: Features live room tracking and UI pagination (6 rooms per page).
+### Client Architecture
+The WinForms client follows a **Controller-View separation**: `GameController` acts as the sole mediator between raw TCP events and the UI. It maintains a local state mirror, translates server events into structured model updates, and pushes pure render calls to `GameForm`.
 
-    Spectator Mode: Users can join full or active games as watchers to view the board state live without participating.
+---
 
-    Server-Authoritative Validation: The server verifies every move, draw, and pass to prevent cheating.
+## Features
 
-    Robust Disconnect Handling: * Host Migration: If the host leaves a waiting room, the host title transfers to the next player automatically.
+- **Real-Time Multiplayer** — 2 to 4 players per game room, with sub-second state propagation.
+- **Dynamic Lobby** — Live room discovery with paginated UI (6 rooms per page) and continuous sync.
+- **Spectator Mode** — Join any active or full game as a read-only observer. Spectators receive a full board snapshot on join and stream all subsequent updates.
+- **Server-Authoritative Validation** — Every `PlayDomino`, `DrawTile`, and `Pass` action is validated server-side for turn order and tile possession before broadcast.
+- **Robust Disconnect Handling:**
+  - *Host Migration* — If the host leaves a waiting room, ownership transfers to the next player automatically.
+  - *Mid-Game Restart* — If a player disconnects during an active game, their score is preserved, the board resets, and the round restarts for remaining players.
+  - *Auto-Cleanup* — Rooms are destroyed when all players leave or only one player remains in an active game.
 
-        Mid-Game Restarts: If a player disconnects during a game, their score is preserved, the board is wiped, and the round seamlessly restarts for the remaining players.
+---
 
-        Auto-Cleanup: Rooms are automatically destroyed if all players leave or if only 1 player remains during an active game.
+## Core Flows
 
-🔄 Use Case Flows
-1. Standard Game Flow (Login to Game Over)
+### Standard Game Flow
 
-    Login: The client connects via TCP and sends a LoginRequest with their name.
+```
+Login → Lobby Snapshot → Create/Join Room → Waiting Room
+  → Host Starts Game → Tiles Dealt → Gameplay Loop
+  → Round End (score popup) → [Repeat or Game Over] → Return to Lobby
+```
 
-    Lobby: The server responds with EventLoginOk and an EventLobbySnapshot containing active rooms.
+1. **Login** — Client connects via TCP and sends `LoginRequest`. Server responds with `EventLoginOk` + `EventLobbySnapshot`.
+2. **Room** — Player sends `CreateRoom` or `JoinRoom`. Server assigns them to a group and broadcasts `RoomSnapshot`.
+3. **Start** — Host sends `ActionReadyUp` (requires ≥2 players). Server initializes the engine, deals tiles, and emits `EventTileDealt`.
+4. **Gameplay** — Players send `PlayDomino`, `DrawTile`, or `Pass`. Each is validated, applied, and broadcast.
+5. **Round End** — Empty hand or blocked board triggers score calculation and `EventRoundEnded`.
+6. **Game Over** — First player to reach the score limit receives `EventGameOver`.
 
-    Room Creation/Join: The player sends CreateRoom or JoinRoom. The server assigns them to a group and broadcasts a RoomSnapshot to everyone in the room.
+### Spectator Flow
 
-    Waiting Room: Players wait. The "Start Game" button is only enabled for the Host when ≥2 players join.
+1. Player selects an active room and sends `WatchRoom`.
+2. Server responds with `EventWatcherJoined` containing full current board state.
+3. `GameController` initializes in `_isWatcher = true` mode — board renders, all inputs are disabled.
 
-    Start Game: The Host clicks start, sending an ActionReadyUp. The server initializes the GameEngine, deals tiles, and broadcasts EventTileDealt.
+### Disconnect / Leave Flow
 
-    Gameplay Loop: * Players send PlayDomino, DrawTile, or Pass.
+| Scenario | Outcome |
+|---|---|
+| Leave waiting room (was host) | Host title migrates to next player |
+| Leave waiting room (not host) | Player removed, room snapshot re-broadcast |
+| Leave active game (2+ players remain) | Score preserved, `StartNewRound()` triggered |
+| Leave active game (1 player remains) | Room aborted, remaining player shown "All others left" |
 
-        The server validates the action via RulesValidator.
+---
 
-        The server broadcasts EventDominoPlayed, EventTileDrawn, or EventPlayerPassed to update client UIs.
+## Project Reference
 
-    Round End: A player empties their hand or the board is blocked. The server calculates scores and sends EventRoundEnded. The UI shows a popup.
+### `Client_UI`
 
-    Game Over: If a player reaches the score limit, EventGameOver is sent. Players click to return, sending ActionJoinLobby.
+| Class | Responsibility |
+|---|---|
+| `LobbyForm` | Lobby rendering, pagination, room navigation |
+| `GameController` | TCP event handling, local state mirroring, UI dispatch |
+| `GameForm` | Pure rendering of board, tiles, scores |
 
-2. Spectator Flow
+**Key methods:**
+- `GameController.HandleDominoPlayed()` — Updates board mirror, flips tiles for edge placement, decrements opponent hand counts.
+- `GameController.HandleRoundEnded()` — Triggers score popup, clears board state.
+- `GameController.OnFormClosing()` — Intercepts window close to flush `ActionLeaveRoom` before socket teardown.
 
-    Watch Room: A player selects an active/full room and clicks "Watch", sending WatchRoom.
+### `Server_Side`
 
-    Sync State: The server sends EventWatcherJoined containing the current board state.
+| Class | Responsibility |
+|---|---|
+| `TcpCommServer` | Connection acceptance, framed byte I/O, socket cleanup |
+| `MessageRouter` | Reflection-based JSON-to-handler dispatch |
+| `GameManager` | Room lifecycle, player registry, engine mapping |
+| `GroupManager` | Pub/Sub channels, parallel group broadcast |
+| `RoomHandlers` | `CreateRoom`, `JoinRoom`, `LeaveRoom` |
+| `MatchHandlers` | `PlayDomino`, `DrawTile`, `Pass`, `ReadyUp` |
+| `LobbyHandlers` | `Login`, `JoinLobby`, `WatchRoom` |
 
-    Read-Only UI: The GameController initializes in spectator mode (_isWatcher = true), rendering the board but disabling interactive inputs.
+**Key methods:**
+- `TcpCommServer.HandlePlayerCleanupAsync()` — Catches dropped sockets, injects a synthetic `LeaveRoom` to maintain consistent game state.
+- `GameManager.RemovePlayer()` — Removes a player and triggers host migration when the departing player held the `OwnerId`.
+- `HandleLeaveRoomAsync()` — Central teardown logic; branches across all three disconnect scenarios.
 
-3. Disconnection / Leave Flow
+### `Game_Engine`
 
-    Trigger: A player clicks "Leave Room" or forcefully closes the app (triggering a synthetic leave via TcpCommServer.HandlePlayerCleanupAsync).
+| Class | Responsibility |
+|---|---|
+| `GameEngine` | Round lifecycle, tile distribution, turn management |
+| `RulesValidator` | Move legality, draw eligibility, block detection |
+| `BoardState` | Live board representation, edge values |
 
-    Evaluation: HandleLeaveRoomAsync assesses the room state.
+**Key methods:**
+- `GameEngine.StartNewRound()` — Initializes Boneyard, wipes board, deals tiles, determines first player.
+- `GameEngine.PlayTileLeft/Right()` — Full validation pipeline → hand removal → edge update → end-of-round check.
+- `GameEngine.RemovePlayerKeepScore()` — Extracts disconnected player, recalibrates `CurrentPlayerIndex`, preserves cumulative score.
+- `RulesValidator.IsBlockedRound()` — Returns `true` only when the Boneyard is empty and no player has a legal move.
 
-    Outcome A (Waiting Room): If the room hasn't started, the player is removed. If they were the host, GameManager.RemovePlayer migrates the host title.
+---
 
-    Outcome B (Active Game, 2+ Players): The player is removed via RemovePlayerKeepScore. The engine triggers StartNewRound() and deals fresh hands to the remaining players.
+## Getting Started
 
-    Outcome C (Active Game, 1 Player Left): The game aborts. The UI shows "All other players left", and GameManager.RemoveRoom destroys the room.
+```bash
+# Clone the repository
+git clone https://github.com/your-org/domino-multiplayer.git
 
-📖 Method Summaries
-Client_UI
+# Build the solution
+dotnet build Domino.sln
 
-LobbyForm.cs
+# Start the server
+dotnet run --project Server_Side
 
-    BuildUI(): Constructs the WinForms components (buttons, panels, lists) programmatically.
+# Launch a client (repeat for multiple players)
+dotnet run --project Client_UI
+```
 
-    OnMessageReceived(): The main thread-safe event listener for routing server JSON payloads to lobby UI updates.
+> The server binds to a configurable TCP port (default: see `appsettings.json`). All clients must point to the server's host and port before connecting.
 
-    RenderPage() / LoadRooms(): Handles the logic for displaying 6 room cards per page using pagination.
+---
 
-    ShowWaitingRoom(): Swaps the UI from the lobby view to the specific room's player list and evaluates host permissions.
+## Team
+***- Abdelrahim Ahmed : https://github.com/Speedmob***
 
-    OpenGameForm() / OpenSpectatorForm(): Hides the lobby and boots up the GameController for playing or watching.
+***- Mohamed Ali : https://github.com/mohdali300***
 
-GameController.cs
+***- Abdelrahman Abdelhalem : https://github.com/AbdoHalem***
 
-    OnMessageReceived(): Translates server events (DominoPlayed, TileDrawn, RoundEnded) into local state updates.
+***- Ahmed Ebrahim : https://github.com/AhmedNabilko***
 
-    HandleDominoPlayed(): Updates the local board mirror, flips tiles if necessary based on edge placement, and decrements opponent card counts.
+***- Abdelrahman Saleem : https://github.com/AbdelrhmanSaleem***
 
-    HandleRoundEnded() / HandleNewRoundDealt(): Updates local scores, triggers UI popups, and clears the board when fresh tiles arrive.
+---
+## License
 
-    OnTilePlaced() / OnLeaveGame(): Translates user UI clicks into outgoing network requests (ActionPlayDomino, ActionLeaveRoom).
-
-    OnFormClosing(): Intercepts the window 'X' button to ensure the ActionLeaveRoom packet is flushed before the app dies.
-
-Server_Side
-
-TcpCommServer.cs & MessageRouter.cs
-
-    Start() / AcceptClientsAsync(): Binds to the port and continuously accepts incoming TCP connections.
-
-    HandleClientAsync(): Reads length-prefixed bytes, decodes JSON strings, and passes them to the MessageRouter.
-
-    HandlePlayerCleanupAsync(): Catches dropped sockets, injects a synthetic LeaveRoom request to gracefully update game states, and destroys the socket.
-
-    RouteMessageAsync(): Parses the Action string from JSON and invokes the matching [MessageRoute] handler.
-
-GameManager.cs & GroupManager.cs
-
-    CreateRoom() / RemoveRoom(): Allocates or completely destroys a RoomRecord and its associated GameEngine.
-
-    RemovePlayer(): Removes a player from a room's registry and performs automatic Host Migration if the leaving player was the OwnerId.
-
-    AddToGroup() / BroadcastToGroupAsync(): Manages pub/sub channels (e.g., "Lobby" or "Room_123") and parallel-sends TCP messages to all grouped sockets.
-
-Server Handlers (RoomHandlers, MatchHandlers, LobbyHandlers)
-
-    HandleLoginAsync(): Registers the player's name and sends the initial lobby snapshot.
-
-    HandleCreateRoomAsync() / HandleJoinRoomAsync(): Validates room capacity, adds players to the room group, and broadcasts updated room states.
-
-    HandleLeaveRoomAsync(): Complex teardown logic that determines whether to migrate a host, restart a mid-game round, or abort an empty match.
-
-    HandlePlayDominoAsync(): Validates turn order and tile possession, executes the move on the engine, and broadcasts the result.
-
-Game_Engine
-
-GameEngine.cs
-
-    StartNewRound(): Initializes the Boneyard, wipes the BoardState, distributes tiles to players, and calculates who goes first.
-
-    PlayTileLeft() / PlayTileRight(): Validates rules, removes the tile from the player's hand, updates the board edges, and triggers EndRound if the hand is empty.
-
-    RemovePlayerKeepScore(): Safely extracts a disconnected player from the Players array and recalibrates the CurrentPlayerIndex while keeping scores intact.
-
-    AdvanceTurn(): Shifts the active player index and checks if the round is deadlocked (blocked).
-
-RulesValidator.cs & BoardState.cs
-
-    IsValidMove() / CanPlayTile(): Checks if a domino's pips match the current LeftValue or RightValue of the board.
-
-    IsBlockedRound(): Determines if the boneyard is empty and absolutely no player has a valid move available.
+This project for educational purpose.
