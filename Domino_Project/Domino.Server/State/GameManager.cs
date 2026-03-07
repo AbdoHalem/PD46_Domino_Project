@@ -83,7 +83,19 @@ namespace Domino.Server.State
                 if (kvp.Value.Players.TryRemove(connectionId, out _))
                 {
                     leftRoomId = kvp.Key;
-                    Console.WriteLine($"[GameManager] {connectionId} left room '{kvp.Value.RoomName}'");
+                    var room = kvp.Value;
+
+                    // ── NEW: Host Migration Logic ──
+                    // If the host leaves but there are still players waiting, reassign the host
+                    if (room.OwnerId == connectionId && room.Players.Count > 0)
+                    {
+                        var newHost = room.Players.FirstOrDefault();
+                        room.OwnerId = newHost.Key;
+                        room.OwnerName = newHost.Value;
+                        Console.WriteLine($"[GameManager] Host migrated to {room.OwnerName} in room '{room.RoomName}'");
+                    }
+
+                    Console.WriteLine($"[GameManager] {connectionId} left room '{room.RoomName}'");
                     break;
                 }
             }
@@ -142,6 +154,15 @@ namespace Domino.Server.State
                 if (engine.Players[i].PlayerName == name)
                     return i;
             return -1;
+        }
+        public void RemoveRoom(string roomId)
+        {
+            if (_rooms.TryRemove(roomId, out var room))
+            {
+                _engines.TryRemove(roomId, out _);
+                _watchers.TryRemove(roomId, out _);
+                Console.WriteLine($"[GameManager] Room '{room.RoomName}' was removed because all other players left.");
+            }
         }
     }
 }

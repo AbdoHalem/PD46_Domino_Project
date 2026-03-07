@@ -278,25 +278,106 @@ namespace Domino.Server.Handlers
         }
 
         // ── Player voluntarily leaves room ────────────────────────────
+        // ── Player voluntarily leaves room or disconnects ────────────────────────────
         [MessageRoute(GameConstants.ActionLeaveRoom)]
         public async Task HandleLeaveRoomAsync(PlayerConnection player, JsonElement payload)
         {
-            _gameManager.RemovePlayer(player.ConnectionId, out string roomId);
+            string connId = player.ConnectionId;
+            string name = _gameManager.GetPlayerName(connId);
+
+            // RemovePlayer now handles Host Migration internally if the host leaves!
+            _gameManager.RemovePlayer(connId, out string roomId);
             if (roomId == null) return;
 
             string roomGroup = $"Room_{roomId}";
             _groupManager.RemoveFromGroup(roomGroup, player);
             _groupManager.AddToGroup("Lobby", player);
 
-            string name = _gameManager.GetPlayerName(player.ConnectionId);
-            await _groupManager.BroadcastToGroupAsync(roomGroup,
-                Envelope(GameConstants.EventPlayerLeft, new PlayerLeftResponse
-                {
-                    PlayerName = name,
-                    Message = $"{name} has left the room."
-                }));
+            var engine = _gameManager.GetEngine(roomId);
+            var roomRecord = _gameManager.GetRoom(roomId);
 
-            await SendLobbySnapshot(player);
+            // If the game is currently active, we need special handling
+            if (engine != null && roomRecord != null && roomRecord.GameRunning)
+            {
+                if (roomRecord.Players.Count <= 1)
+                {
+                    // Only 1 player left. Abort the game entirely.
+                    await _groupManager.BroadcastToGroupAsync(roomGroup,
+                        Envelope(GameConstants.EventPlayerLeft, new PlayerLeftResponse
+                        {
+                            PlayerName = name,
+                            Message = $"{name} left. Not enough players to continue.",
+                            GameAborted = true
+                        }));
+
+                    _gameManager.EndGame(roomId);
+                    _gameManager.RemoveRoom(roomId);
+                }
+                else
+                {
+                    // 2+ players remain. Restart the round but keep scores.
+                    engine.RemovePlayerKeepScore(name);
+
+                    await _groupManager.BroadcastToGroupAsync(roomGroup,
+                        Envelope(GameConstants.EventPlayerLeft, new PlayerLeftResponse
+                        {
+                            PlayerName = name,
+                            Message = $"{name} has left the game. The round will restart.",
+                            GameAborted = false
+                        }));
+
+                    // Wipe the board and deal fresh hands
+                    engine.StartNewRound();
+
+                    // Distribute the new private hands to the remaining players
+                    foreach (var kvp in roomRecord.Players)
+                    {
+                        string pConnId = kvp.Key;
+                        string pName = kvp.Value;
+
+                        var pState = engine.Players.FirstOrDefault(p => p.PlayerName == pName);
+                        if (pState == null) continue;
+
+                        var conn = GetConnectionFromGroup(roomGroup, pConnId);
+                        if (conn == null) continue;
+
+                        var hand = pState.Cards
+                            .Select(t => new TileDto { Left = t.LeftSide, Right = t.RightSide })
+                            .ToList();
+
+                        await conn.SendMessageAsync(Envelope(GameConstants.EventTileDealt,
+                            new PlayerHandResponse
+                            {
+                                PlayerName = pName,
+                                Hand = hand,
+                                BoneyardCount = engine.Boneyard.Count,
+                                FirstTurn = engine.CurrentPlayer.PlayerName
+                            }));
+                    }
+                }
+            }
+            else
+            {
+                // The game wasn't running yet (just hanging out in the waiting room)
+                if (roomRecord != null && roomRecord.Players.Count == 0)
+                {
+                    // The last person (or the host alone) left before starting. Destroy the room!
+                    _gameManager.RemoveRoom(roomId);
+                }
+                else if (roomRecord != null)
+                {
+                    // Broadcast a fresh RoomSnapshot
+                    // This forces the LobbyForm to instantly redraw the waiting room list.
+                    // If the host migrated, the new host will instantly get the "Start Game" button!
+                    await _groupManager.BroadcastToGroupAsync(roomGroup,
+                        Envelope(GameConstants.EventRoomSnapshot, BuildRoomState(roomRecord)));
+                }
+            }
+
+            // Update the lobby so the player count drops accurately on the UI cards,
+            // or removes the card completely if the room was just destroyed!
+            await _groupManager.BroadcastToGroupAsync("Lobby",
+                Envelope(GameConstants.EventLobbySnapshot, BuildLobbySnapshot()));
         }
 
         // ── Private helpers ───────────────────────────────────────────

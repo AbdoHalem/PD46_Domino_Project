@@ -107,6 +107,7 @@ namespace Domino.Shared.Models.Responses
     public class PlayerLeftResponse
     {
         public string PlayerName { get; set; }
-        public string Message    { get; set; }
+        public string Message { get; set; }
+        public bool GameAborted { get; set; }
     }
 }

@@ -100,6 +100,8 @@ namespace Client_UI
             Text = $"Domino (Spectator)  –  {playerName}";
             FormBorderStyle = FormBorderStyle.Sizable;
 
+            // Allow spectators to use the Quit button
+            _gameForm.LeaveGameRequested += OnLeaveGame;
             // ── Wire network events (We DO NOT wire outgoing actions for watchers)
             _client.MessageReceived += OnMessageReceived;
 
@@ -177,15 +179,34 @@ namespace Client_UI
                 HandleGameOver(e.Payload);
                 break;
 
-                // ── Player disconnected mid-game ──────────────────────
+                    // ── Player disconnected mid-game ──────────────────────
                 case GameConstants.EventPlayerLeft:
                     var left = e.Payload.Deserialize<PlayerLeftResponse>(JsonOpts.Default);
                     if (left != null)
-                        MessageBox.Show(left.Message, "Player Left",
-                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    {
+                        if (left.GameAborted)
+                        {
+                            MessageBox.Show("All other players left the game. The game has ended.",
+                                "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            Close(); // Close the game form and return to lobby
+                        }
+                        else
+                        {
+                            MessageBox.Show($"{left.Message}\n\nThe round will now restart.",
+                                "Player Left", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                            // Remove the player from the local UI state
+                            var opp = _others.FirstOrDefault(o => o.Name == left.PlayerName);
+                            if (opp != null)
+                            {
+                                _others.Remove(opp);
+                            }
+                            // The UI will update automatically when the server sends EventTileDealt for the new round
+                        }
+                    }
                     break;
 
-                case GameConstants.EventError:
+                    case GameConstants.EventError:
                     MessageBox.Show(e.Payload.GetString(), "Game Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     break;
@@ -365,10 +386,32 @@ namespace Client_UI
             await _client.SendAsync(GameConstants.ActionPass,
                 new { GameId = _currentRoomId });
 
+        private bool _isLeaving = false; // Prevents sending the leave command twice
+
         private async void OnLeaveGame(object sender, EventArgs e)
         {
+            if (_isLeaving) return;
+            _isLeaving = true;
+
             await _client.SendAsync(GameConstants.ActionLeaveRoom);
+            await Task.Delay(150); // Flush the network stream
+
             Close();
+        }
+
+        // ── NEW: Catches the 'X' button on the window ─────────────────
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            // If the user clicked the 'X' button instead of 'Quit', tell the server!
+            if (!_isLeaving)
+            {
+                _isLeaving = true;
+
+                // Fire-and-forget the leave command. The TCP socket belongs to the 
+                // main app, so it will successfully send even as the form closes.
+                _ = _client.SendAsync(GameConstants.ActionLeaveRoom);
+            }
+            base.OnFormClosing(e);
         }
 
         private async void OnNewGame(object sender, EventArgs e) =>

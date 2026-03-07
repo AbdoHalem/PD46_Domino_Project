@@ -199,5 +199,24 @@ namespace Game_Engine
                 OnGameOver?.Invoke(gameWinner.PlayerName);
             }
         }
+        public void RemovePlayerKeepScore(string playerName)
+        {
+            var playerToRemove = Players.FirstOrDefault(p => p.PlayerName == playerName);
+            if (playerToRemove != null)
+            {
+                int index = Players.IndexOf(playerToRemove);
+                Players.Remove(playerToRemove);
+
+                // Adjust CurrentPlayerIndex so we don't go out of bounds
+                if (index < CurrentPlayerIndex)
+                {
+                    CurrentPlayerIndex--;
+                }
+                else if (CurrentPlayerIndex >= Players.Count)
+                {
+                    CurrentPlayerIndex = 0;
+                }
+            }
+        }
     }
 }

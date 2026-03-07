@@ -124,6 +124,15 @@ namespace Connection.Engine.Network
         {
             try
             {
+                // ── NEW: Force the game engine to run the LeaveRoom logic ──
+                // This handles score preservation, round restarts, and UI popups.
+                string syntheticLeaveReq = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    Action = "LeaveRoom"
+                });
+                await _router.RouteMessageAsync(player, syntheticLeaveReq);
+                // ───────────────────────────────────────────────────────────
+
                 _connectionRegistry.RemoveConnection(player.ConnectionId);
 
                 string[] groupsToLeave = System.Linq.Enumerable.ToArray(player.CurrentGroups);
@@ -134,7 +143,7 @@ namespace Connection.Engine.Network
 
                     string disconnectNotice = System.Text.Json.JsonSerializer.Serialize(new
                     {
-                        Action  = "PlayerDisconnected",
+                        Action = "PlayerDisconnected",
                         Payload = new { PlayerId = player.ConnectionId }
                     });
 
