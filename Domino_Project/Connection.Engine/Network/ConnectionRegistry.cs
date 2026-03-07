@@ -6,8 +6,6 @@ namespace Connection.Engine.Network
 {
     public class ConnectionRegistry
     {
-        // Thread-safe dictionary prevents crashes if multiple players connect/disconnect at the exact same millisecond.
-        // Key: ConnectionId, Value: PlayerConnection object
         private readonly ConcurrentDictionary<string, PlayerConnection> _connections = new();
 
         public void AddConnection(PlayerConnection player)
@@ -29,10 +27,9 @@ namespace Connection.Engine.Network
         public PlayerConnection GetConnection(string connectionId)
         {
             _connections.TryGetValue(connectionId, out var player);
-            return player; // Returns null if the player doesn't exist
+            return player;
         }
 
-        // We expose this specifically so our Heartbeat Monitor loop can check everyone's LastMessageReceivedAt
         public IEnumerable<PlayerConnection> GetAllConnections()
         {
             return _connections.Values;

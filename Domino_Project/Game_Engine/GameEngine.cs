@@ -20,19 +20,14 @@ namespace Game_Engine
         public bool IsGameOver { get; private set; }
         public PlayerState CurrentPlayer => Players[CurrentPlayerIndex];
 
-        #region delegates & events
-        // fired when a new player turn
         public delegate void TurnChangedEventHandler(string playerName);
         public event TurnChangedEventHandler OnTurnChanged;
 
-        // fired when a round ends
         public delegate void RoundEndedEventHandler(string winnerName);
         public event RoundEndedEventHandler OnRoundEnded;
 
-        // fired when the whole game is over
         public delegate void GameOverEventHandler(string winnerName);
         public event GameOverEventHandler OnGameOver; 
-        #endregion
 
         public GameEngine(Room room)
         {
@@ -52,7 +47,6 @@ namespace Game_Engine
             StartNewRound();
         }
 
-        // play a tile on the board for the current player, true if the move was valid and accepted, false otherwise
         public bool PlayCard(DominoTile tile, string side)
         {
             if (IsGameOver) return false;
@@ -83,31 +77,37 @@ namespace Game_Engine
             return true;
         }
 
-        // Draws one tile from the boneyard and adds it to the current player's hand
         public DominoTile DrawFromBoneyard()
         {
-            if (!_rulesValidator.CanDraw(Boneyard))
-                throw new InvalidOperationException("Boneyard is empty, cannot draw.");
+            if (!_rulesValidator.CanDraw(Boneyard, Board, CurrentPlayer))
+                throw new InvalidOperationException("Cannot draw: either you have a playable card or the boneyard is empty.");
 
             DominoTile tile = Boneyard.DrawCard();
             CurrentPlayer.AddCard(tile);
+
+            if (_rulesValidator.IsBlockedRound(Players, Board, Boneyard))
+            {
+                EndRound(null);
+            }
             return tile;
         }
 
-        // pass the current player's turn
         public void Pass()
         {
             if (!_rulesValidator.CanPass(CurrentPlayer, Board, Boneyard))
                 throw new InvalidOperationException(
                     "Cannot pass: either the boneyard has tiles, or you have a playable card.");
+            if (_rulesValidator.IsBlockedRound(Players, Board, Boneyard))
+            {
+                EndRound(null);
+                return;
+            }
 
             AdvanceTurn();
         }
 
-        // Resets the board and deals new hands for another round
         public void StartNewRound()
         {
-            // 1. NEW: Wipe everyone's hands before dealing!
             foreach (var player in Players)
             {
                 player.ClearCards();
@@ -123,12 +123,10 @@ namespace Game_Engine
             IsGameOver = false;
         }
 
-        // for UI use
         public bool CanCurrentPlayerPlay() => _rulesValidator.CanPlayerPlay(CurrentPlayer, Board);
-        public bool CanCurrentPlayerDraw() => _rulesValidator.CanDraw(Boneyard);
+        public bool CanCurrentPlayerDraw() => _rulesValidator.CanDraw(Boneyard, Board, CurrentPlayer);
         public bool CanCurrentPlayerPass() => _rulesValidator.CanPass(CurrentPlayer, Board, Boneyard);
 
-        // save the result to a text file
         public void SaveResultToFile()
         {
             string outputDirectory = Path.GetFullPath(
@@ -145,10 +143,8 @@ namespace Game_Engine
             File.WriteAllText(Path.Combine(outputDirectory, fileName), line);
         }
 
-        // helpers
         private int DetermineFirstPlayer()
         {
-            // player holding the highest double goes first
             for (int val = 6; val >= 0; val--)
             {
                 for (int i = 0; i < Players.Count; i++)
@@ -161,7 +157,6 @@ namespace Game_Engine
                 }
             }
 
-            // fallback: player with highest total tile goes first
             int bestPlayer = 0;
             int bestTotal = -1;
             for (int i = 0; i < Players.Count; i++)
@@ -186,11 +181,9 @@ namespace Game_Engine
 
         private void EndRound(PlayerState roundWinner)
         {
-            // In a blocked round, the player with the lowest hand sum wins the round
             if (roundWinner == null)
                 roundWinner = Players.OrderBy(p => p.GetHandSum()).First();
 
-            // All other players add their remaining hand sum to their score
             foreach (PlayerState player in Players)
             {
                 if (player != roundWinner)

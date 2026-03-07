@@ -19,7 +19,6 @@ namespace Client_UI
         List<RoomData> dummyRooms = new List<RoomData>();
         private List<RoomData> _allRooms = new List<RoomData>();
 
-        // This will now act as a persistent cache for ALL created panels
         Dictionary<string, Panel> _activeCards = new Dictionary<string, Panel>();
         private Dictionary<string, Action<string[]>> _serverCommandHandlers;
 
@@ -103,10 +102,8 @@ namespace Client_UI
             UpdatePaginationButtons();
         }
 
-        // --- NEW: Function to handle a single newly created room ---
         private void HandleNewRoom(string[] data)
         {
-            // Expected format from server: NEWROOM|RoomName,MaxPlayers,CurrentPlayers
             if (data.Length == 0) return;
 
             string[] parts = data[0].Split(',');
@@ -310,19 +307,16 @@ namespace Client_UI
                 LoadRooms(parsedRooms);
         }
 
-        // Helper to unwrap string array for the action dictionary
         private void HandleFrequentUpdateCommand(string[] data)
         {
             if (data.Length >= 2)
             {
-                // Expected command format: UPDATE|RoomName|NewCount
                 HandleFrequentUpdate(data[0], data[1]);
             }
         }
 
         public void HandleFrequentUpdate(string roomName, string newCount)
         {
-            // 1. Update the master data list
             int index = _allRooms.FindIndex(r => r.RoomName == roomName);
             if (index != -1)
             {
@@ -331,9 +325,6 @@ namespace Client_UI
                 _allRooms[index] = room;
             }
 
-            // 2. Check the Cache Dictionary. 
-            // If it hasn't been created yet, this safely ignores it.
-            // If it HAS been created, it updates the visual element immediately (even if the card is off-page).
             if (_activeCards.TryGetValue(roomName, out Panel cachedCard))
             {
                 UpdatePlayerCountText(cachedCard, newCount);
@@ -345,7 +336,6 @@ namespace Client_UI
             await Task.Delay(5000);
             HandleFrequentUpdate("المررحفين", "4");
 
-            // Testing the NEWROOM functionality
             await Task.Delay(2000);
             ProcessIncomingData("NEWROOM|غرفة_جديدة,3,1");
         }

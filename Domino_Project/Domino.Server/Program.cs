@@ -1,13 +1,3 @@
-// =====================================================================
-//  FILE: Program.cs  (Domino.Server project)
-//
-//  FIX: Removed `using Connection` (wrong / non-existent namespace).
-//       Correct namespace is `Domino.Engine.Networking`.
-//
-//  The circular dependency is broken because Connection.Engine never
-//  references Domino.Server. Program.cs wires them at startup via
-//  server.SetHandlerFactory().
-// =====================================================================
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -23,10 +13,9 @@ namespace Domino.Server
         static async Task Main(string[] args)
         {
             Console.WriteLine("╔══════════════════════════════════╗");
-            Console.WriteLine("║   Domino Game Server  v2.0       ║");
+            Console.WriteLine("║   Domino Game Server  v1.0       ║");
             Console.WriteLine("╚══════════════════════════════════╝");
 
-            // ── Ensure GameResults directory exists ───────────────────
             string resultsDir = Path.GetFullPath(
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
                              "..", "..", "..", "GameResults"));
@@ -36,16 +25,12 @@ namespace Domino.Server
             int port   = 5500;
             var server = new TcpCommServer(port);
 
-            // ── Create game-logic singletons ──────────────────────────
             var gameManager = new GameManager();
 
             // Grab the objects TcpCommServer owns internally
             GroupManager       groupManager = server.GroupManager;
             ConnectionRegistry registry     = server.Registry;
 
-            // ── Inject dependencies into the handler factory ──────────
-            // The factory is called once per handler class at startup.
-            // It tries the richest constructor first, falls back gracefully.
             server.SetHandlerFactory(handlerType =>
             {
                 // 3-arg: (GroupManager, GameManager, ConnectionRegistry)
@@ -68,7 +53,6 @@ namespace Domino.Server
                 return Activator.CreateInstance(handlerType, groupManager);
             });
 
-            // ── Start listening ───────────────────────────────────────
             server.Start();
             Console.WriteLine($"Server live on port {port}. Press Ctrl+C to quit.");
             await Task.Delay(-1);

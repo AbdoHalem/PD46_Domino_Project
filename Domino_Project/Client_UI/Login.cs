@@ -1,20 +1,3 @@
-// =====================================================================
-//  FILE: Login.cs  (Client_UI)
-//
-//  BUGS FIXED
-//  ----------
-//  1. btnLogin.Click was NEVER wired. Pressing Login did nothing.
-//  2. No TCP connection to the server was ever made.
-//  3. No navigation to the Lobby form after successful login.
-//
-//  HOW IT WORKS NOW
-//  ----------------
-//  • User types a name, presses Login.
-//  • We connect to the server via DominoClient.
-//  • We send ActionLogin with the player name.
-//  • On receiving EventLoginOk we open the Lobby window.
-//  • On failure we show an error and allow retry.
-// =====================================================================
 using System;
 using System.Drawing;
 using System.Text.Json;
@@ -28,7 +11,6 @@ namespace Client_UI
     {
         private DominoClient _client;
 
-        // Hardcoded for the university project; could be a settings dialog.
         private const string ServerHost = "127.0.0.1";
         private const int    ServerPort = 5500;
 
@@ -36,14 +18,12 @@ namespace Client_UI
         {
             InitializeComponent();
 
-            // FIX: wire the click event that was missing
             btnLogin.Click += BtnLogin_ClickAsync;
         }
 
         private void Login_Load(object sender, EventArgs e)
         {
             btnLogin.FlatAppearance.BorderSize = 0;
-            // Allow pressing Enter in the name box to trigger login
             textBox1.KeyDown += (s, ke) =>
             {
                 if (ke.KeyCode == Keys.Enter) BtnLogin_ClickAsync(s, ke);
@@ -63,10 +43,8 @@ namespace Client_UI
             btnLogin.Enabled = false;
             btnLogin.Text    = "Connecting…";
 
-            // 1. Create client (passing 'this' so it can marshal to UI thread)
             _client = new DominoClient(this);
 
-            // 2. Subscribe BEFORE connecting so we don't miss the first message
             _client.MessageReceived += (s, args) =>
             {
                 if (args.Action == GameConstants.EventLoginOk)
@@ -77,7 +55,6 @@ namespace Client_UI
 
             _client.Disconnected += (s, a) => OnLoginError("Disconnected from server.");
 
-            // 3. Connect
             bool connected = await _client.ConnectAsync(ServerHost, ServerPort);
             if (!connected)
             {
@@ -85,13 +62,11 @@ namespace Client_UI
                 return;
             }
 
-            // 4. Send login request
             await _client.SendAsync(GameConstants.ActionLogin, new { PlayerName = playerName });
         }
 
         private void OnLoginSuccess(string playerName, JsonElement payload)
         {
-            // Open Lobby, pass the already-connected client so it's reused
             var lobby = new LobbyForm(_client, playerName);
             lobby.FormClosed += (s, e) => this.Close();
             this.Hide();

@@ -51,13 +51,14 @@ namespace Game_Engine
         // if player has at least one valid tile based on the current board state
         public bool CanPlayerPlay(PlayerState player, BoardState board)
         {
+            if (board.LeftValue == -1 && board.RightValue == -1) return true;
             return player.HasPlayableCard(board.LeftValue, board.RightValue);
         }
 
         // if player can draw a tile (if it's not empty)
-        public bool CanDraw(Boneyard boneyard)
+        public bool CanDraw(Boneyard boneyard,BoardState board, PlayerState player)
         {
-            return !boneyard.IsEmpty;
+            return !boneyard.IsEmpty && !CanPlayerPlay(player, board);
         }
 
         // if player can pass (if they have no playable cards and the boneyard is empty)

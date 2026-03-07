@@ -1,19 +1,13 @@
-// =====================================================================
-//  FILE: Responses.cs  (Domino.Shared/Models/Responses)
-//  All S→C response / broadcast payloads.
-// =====================================================================
 using System.Collections.Generic;
 
 namespace Domino.Shared.Models.Responses
 {
-    // ── Login ─────────────────────────────────────────────────────────
     public class LoginOkResponse
     {
         public string ConnectionId { get; set; }
         public string PlayerName   { get; set; }
     }
 
-    // ── Lobby ─────────────────────────────────────────────────────────
     public class RoomSummary
     {
         public string RoomId        { get; set; }
@@ -28,7 +22,6 @@ namespace Domino.Shared.Models.Responses
         public List<RoomSummary> Rooms { get; set; }
     }
 
-    // ── Room ──────────────────────────────────────────────────────────
     public class RoomStateResponse
     {
         public string       RoomId           { get; set; }
@@ -41,7 +34,6 @@ namespace Domino.Shared.Models.Responses
 
     }
 
-    // ── Game start: sent to every player in the room ──────────────────
     public class TileDto
     {
         public int Left  { get; set; }
@@ -53,10 +45,9 @@ namespace Domino.Shared.Models.Responses
         public string        PlayerName   { get; set; }
         public List<TileDto> Hand         { get; set; }
         public int           BoneyardCount { get; set; }
-        public string        FirstTurn    { get; set; }  // name of player who goes first
+        public string        FirstTurn    { get; set; }
     }
 
-    // ── Sent to spectators – no hand, just board state ────────────────
     public class WatcherJoinedResponse
     {
         public string        RoomName     { get; set; }
@@ -65,42 +56,38 @@ namespace Domino.Shared.Models.Responses
         public List<PlayerScoreDto> Scores { get; set; }
     }
 
-    // ── Per-move broadcast ────────────────────────────────────────────
     public class DominoPlayedResponse
     {
         public string  PlayerId   { get; set; }
         public string  PlayerName { get; set; }
         public TileDto Tile       { get; set; }
-        public string  Edge       { get; set; }        // "Left" or "Right"
-        public string  NextTurn   { get; set; }        // name of next player
-        public int     HandCount  { get; set; }        // tiles left in that player's hand
+        public string  Edge       { get; set; }
+        public string  NextTurn   { get; set; }
+        public int     HandCount  { get; set; }
     }
 
-    // ── Draw ──────────────────────────────────────────────────────────
-    public class TileDrawnResponse   // private – only to the drawing player
+    public class TileDrawnResponse
     {
         public TileDto DrawnTile     { get; set; }
         public int     BoneyardCount { get; set; }
     }
 
-    public class DrawBroadcast       // public – so opponents see hand count go up
+    public class DrawBroadcast
     {
         public string PlayerName  { get; set; }
         public int    BoneyardCount { get; set; }
     }
 
-    // ── Pass ──────────────────────────────────────────────────────────
     public class PlayerPassedResponse
     {
         public string PlayerName { get; set; }
         public string NextTurn   { get; set; }
     }
 
-    // ── Round / Game end ─────────────────────────────────────────────
     public class PlayerScoreDto
     {
         public string PlayerName { get; set; }
-        public int    RoundPoints { get; set; }  // points added this round
+        public int    RoundPoints { get; set; }
         public int    TotalScore  { get; set; }
     }
 
@@ -117,7 +104,6 @@ namespace Domino.Shared.Models.Responses
         public List<PlayerScoreDto>  FinalScores { get; set; }
     }
 
-    // ── Player disconnected mid-game ──────────────────────────────────
     public class PlayerLeftResponse
     {
         public string PlayerName { get; set; }

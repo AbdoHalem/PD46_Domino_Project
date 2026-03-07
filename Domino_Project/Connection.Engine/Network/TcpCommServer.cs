@@ -1,15 +1,3 @@
-// =====================================================================
-//  FILE: TcpCommServer.cs  (Connection.Engine project)
-//
-//  FIX: Removed `using Domino.Server` and GameManager constructor
-//       parameter — those created a circular project reference.
-//
-//  Connection.Engine must stay a pure networking library.
-//  It knows nothing about GameManager, rooms, or game logic.
-//  Instead, it exposes SetHandlerFactory() so the application
-//  layer (Domino.Server) can inject its own handler-creation
-//  logic AFTER construction but BEFORE Start().
-// =====================================================================
 using System;
 using System.IO;
 using System.Net;
@@ -28,7 +16,6 @@ namespace Connection.Engine.Network
         private readonly GroupManager       _groupManager;
         private readonly MessageRouter      _router;
 
-        // ── Original single-arg constructor (no GameManager) ──────────
         public TcpCommServer(int port)
         {
             _listener           = new TcpListener(IPAddress.Any, port);
@@ -37,15 +24,9 @@ namespace Connection.Engine.Network
             _router             = new MessageRouter(_groupManager);
         }
 
-        // ── Expose internals so Program.cs can build the factory ─────
         public ConnectionRegistry Registry     => _connectionRegistry;
         public GroupManager       GroupManager => _groupManager;
 
-        // ── Let the application layer supply a custom handler factory ─
-        // Call this BEFORE Start().
-        // Example from Domino.Server/Program.cs:
-        //   server.SetHandlerFactory(type =>
-        //       Activator.CreateInstance(type, groupManager, gameManager, registry));
         public void SetHandlerFactory(Func<Type, object> factory)
         {
             _router.SetHandlerFactory(factory);
@@ -57,7 +38,6 @@ namespace Connection.Engine.Network
             Console.WriteLine($"[Server] Domino TCP Engine started on port {((IPEndPoint)_listener.LocalEndpoint).Port}...");
 
             _ = AcceptClientsAsync();
-            // _ = StartHeartbeatMonitorAsync();  // re-enable for production
         }
 
         private async Task AcceptClientsAsync()
