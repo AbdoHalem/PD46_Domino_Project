@@ -1,19 +1,12 @@
-// =====================================================================
-//  FILE: GameManager.cs  (Domino.Server/State)
-//
-//  FIX: `using Connection` → `using Domino.Engine.Networking`
-//       (Connection is the assembly folder name, not the namespace)
-// =====================================================================
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Connection.Engine.Network;   // ← FIXED: was `using Connection` which doesn't exist
+using Connection.Engine.Network;
 using Game_Engine;
 
 namespace Domino.Server.State
 {
-    /// <summary>Lightweight DTO stored in the registry for a room that has not yet started.</summary>
     public class RoomRecord
     {
         public string RoomId      { get; } = Guid.NewGuid().ToString("N")[..8];
@@ -21,8 +14,7 @@ namespace Domino.Server.State
         public int    MaxPlayers  { get; set; }
         public int    ScoreLimit  { get; set; }
         public string OwnerId     { get; set; }
-        public ConcurrentDictionary<string, string> Players { get; }   // connectionId → playerName
-            = new ConcurrentDictionary<string, string>();
+        public ConcurrentDictionary<string, string> Players { get; } = new ConcurrentDictionary<string, string>();
 
         public bool IsFull    => Players.Count >= MaxPlayers;
         public bool IsReady   => Players.Count >= 2;
@@ -31,27 +23,12 @@ namespace Domino.Server.State
 
     }
 
-    /// <summary>
-    /// Central server-side state manager.
-    /// Injected into all handler classes via their constructor.
-    /// </summary>
     public class GameManager
     {
-        // ── Rooms (lobby phase) ───────────────────────────────────────
         private readonly ConcurrentDictionary<string, RoomRecord> _rooms = new();
-
-        // ── Active GameEngine instances (in-game phase) ───────────────
         private readonly ConcurrentDictionary<string, GameEngine> _engines = new();
-
-        // ── Watchers  roomId → list of watcher ConnectionIds ──────────
         private readonly ConcurrentDictionary<string, ConcurrentBag<string>> _watchers = new();
-
-        // ── Player name lookup  connectionId → displayName ────────────
         private readonly ConcurrentDictionary<string, string> _playerNames = new();
-
-        // =====================================================================
-        //  PLAYER IDENTITY
-        // =====================================================================
 
         public void RegisterPlayer(string connectionId, string playerName)
             => _playerNames[connectionId] = playerName;
@@ -61,10 +38,6 @@ namespace Domino.Server.State
 
         public string GetPlayerName(string connectionId)
             => _playerNames.TryGetValue(connectionId, out var name) ? name : connectionId;
-
-        // =====================================================================
-        //  ROOM MANAGEMENT
-        // =====================================================================
 
         public RoomRecord CreateRoom(string ownerConnectionId, string roomName, int maxPlayers, int scoreLimit)
         {
@@ -77,10 +50,7 @@ namespace Domino.Server.State
             };
 
             string ownerName = GetPlayerName(ownerConnectionId);
-
-            // ADD THIS LINE to save the owner's name into your new state property
             record.OwnerName = ownerName;
-
             record.Players.TryAdd(ownerConnectionId, ownerName);
 
             _rooms[record.RoomId] = record;
@@ -88,7 +58,6 @@ namespace Domino.Server.State
             return record;
         }
 
-        /// <summary>Returns null if room doesn't exist or is full / game running.</summary>
         public RoomRecord JoinRoom(string connectionId, string roomId)
         {
             if (!_rooms.TryGetValue(roomId, out var room)) return null;
@@ -125,14 +94,6 @@ namespace Domino.Server.State
         public RoomRecord GetRoom(string roomId)
             => _rooms.TryGetValue(roomId, out var r) ? r : null;
 
-        // =====================================================================
-        //  GAME ENGINE LIFECYCLE
-        // =====================================================================
-
-        /// <summary>
-        /// Converts a RoomRecord into a live GameEngine.
-        /// Call this when all players in the room have pressed Ready.
-        /// </summary>
         public GameEngine StartGame(string roomId)
         {
             if (!_rooms.TryGetValue(roomId, out var record))
@@ -140,13 +101,12 @@ namespace Domino.Server.State
             if (!record.IsReady)
                 throw new InvalidOperationException("Need at least 2 players.");
 
-            // Build the Game_Engine Room object from our record
             var room = new Room
             {
-                Name          = record.RoomName,
-                ScoreLimit    = record.ScoreLimit,
+                Name = record.RoomName,
+                ScoreLimit = record.ScoreLimit,
                 NumberOfPlayers = record.MaxPlayers,
-                PlayerNames   = record.Players.Values.ToList()
+                PlayerNames = record.Players.Values.ToList()
             };
 
             var engine = new GameEngine(room);
@@ -167,11 +127,6 @@ namespace Domino.Server.State
                 r.GameRunning = false;
         }
 
-        // =====================================================================
-        //  HELPERS
-        // =====================================================================
-
-        /// <summary>Maps a connectionId to the roomId it is currently in.</summary>
         public string FindRoomIdByConnection(string connectionId)
         {
             foreach (var kvp in _rooms)
@@ -180,7 +135,6 @@ namespace Domino.Server.State
             return null;
         }
 
-        /// <summary>Maps a connectionId to the PlayerState index in the engine.</summary>
         public int GetPlayerIndex(GameEngine engine, string connectionId)
         {
             string name = GetPlayerName(connectionId);

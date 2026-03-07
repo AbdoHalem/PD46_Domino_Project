@@ -1,12 +1,3 @@
-// =====================================================================
-//  FILE: MessageRouter.cs  (Connection.Engine project)
-//
-//  CHANGE: Added SetHandlerFactory() so the application layer can
-//  override the default single-arg factory (which only knows about
-//  GroupManager) with one that also supplies GameManager, Registry, etc.
-//
-//  Connection.Engine itself still has zero knowledge of those types.
-// =====================================================================
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,8 +13,6 @@ namespace Connection.Engine.Router
     public class MessageRouter
     {
         private readonly GroupManager _groupManager;
-
-        // Default factory: create handler with only GroupManager (original behaviour)
         private Func<Type, object> _handlerFactory;
 
         private readonly Dictionary<string, Func<PlayerConnection, JsonElement, Task>> _routes
@@ -33,13 +22,8 @@ namespace Connection.Engine.Router
         {
             _groupManager   = groupManager;
             _handlerFactory = type => Activator.CreateInstance(type, groupManager);
-
-            // Routes are registered lazily now (see SetHandlerFactory / EnsureRoutes)
         }
 
-        // ── Called by TcpCommServer.SetHandlerFactory() ───────────────
-        // Replaces the default factory and re-scans for handler methods
-        // so the new factory is used when creating instances.
         public void SetHandlerFactory(Func<Type, object> factory)
         {
             _handlerFactory = factory ?? throw new ArgumentNullException(nameof(factory));
@@ -47,7 +31,6 @@ namespace Connection.Engine.Router
             RegisterRoutesAutomatically();
         }
 
-        // ── Lazy first-call registration (if SetHandlerFactory is not used) ─
         private bool _routesRegistered = false;
 
         private void EnsureRoutes()
@@ -81,7 +64,6 @@ namespace Connection.Engine.Router
 
                     if (!handlerInstances.TryGetValue(classType, out object handlerInstance))
                     {
-                        // Use whichever factory was supplied (default or custom)
                         handlerInstance = _handlerFactory(classType);
                         handlerInstances[classType] = handlerInstance;
                     }
@@ -102,7 +84,7 @@ namespace Connection.Engine.Router
 
         public async Task RouteMessageAsync(PlayerConnection player, string jsonString)
         {
-            EnsureRoutes();   // register on first real message if not already done
+            EnsureRoutes();
 
             try
             {

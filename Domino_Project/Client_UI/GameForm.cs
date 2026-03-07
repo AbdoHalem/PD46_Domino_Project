@@ -51,6 +51,7 @@ namespace Client_UI
         private Panel pnlScore;
         private Button btnDraw, btnPass, btnQuit;
         private Label lblStatus, lblSideCards;
+        private Panel pnlBoardContainer;
 
         // ================================================================
         //  PUBLIC EVENTS
@@ -156,14 +157,24 @@ namespace Client_UI
             };
             Controls.Add(lblSideCards);
 
-            picBoard = new PictureBox
+            pnlBoardContainer = new Panel
             {
                 Location = new Point(0, 68),
                 Size = new Size(940, 220),
+                AutoScroll = true,
+                BackColor = Color.Transparent
+            };
+
+            picBoard = new PictureBox
+            {
+                Location = new Point(0, 0),
+                Size = new Size(940, 200),
                 BackColor = Color.Transparent
             };
             picBoard.Paint += PicBoard_Paint;
-            Controls.Add(picBoard);
+
+            pnlBoardContainer.Controls.Add(picBoard);
+            Controls.Add(pnlBoardContainer);
 
             pnlScore = new Panel
             {
@@ -198,11 +209,11 @@ namespace Client_UI
 
             Resize += (s, e) => {
                 int w = Math.Max(700, ClientSize.Width - 260);
-                picBoard.Width = w;
+                pnlBoardContainer.Width = w;
                 pnlHand.Width = w;
                 pnlScore.Left = ClientSize.Width - 245;
                 btnDraw.Left = btnPass.Left = btnQuit.Left = ClientSize.Width - 235;
-                Refresh();
+                RefreshUI();
             };
         }
 
@@ -265,8 +276,25 @@ namespace Client_UI
             lblSideCards.Text = $"Side cards: {_sideCardsCount}";
 
             bool myTurn = _isMyTurn && !_isWatcher;
-            btnDraw.Enabled = myTurn && _sideCardsCount > 0;
-            btnPass.Enabled = myTurn && _sideCardsCount == 0;
+
+            bool hasValidMove = false;
+            if (_boardTiles.Count == 0) hasValidMove = true;
+            else
+            {
+                int le = _boardTiles[0].Left;
+                int re = _boardTiles[_boardTiles.Count - 1].Right;
+                foreach (var tile in _myHand)
+                {
+                    if (tile.CanPlayOn(le) || tile.CanPlayOn(re))
+                    {
+                        hasValidMove = true;
+                        break;
+                    }
+                }
+            }
+
+            btnDraw.Enabled = myTurn && !hasValidMove && _sideCardsCount > 0;
+            btnPass.Enabled = myTurn && !hasValidMove && _sideCardsCount == 0;
             btnDraw.BackColor = btnDraw.Enabled ? Color.FromArgb(30, 100, 200) : Color.FromArgb(70, 70, 70);
             btnPass.BackColor = btnPass.Enabled ? Color.FromArgb(180, 90, 20) : Color.FromArgb(70, 70, 70);
 
@@ -274,6 +302,12 @@ namespace Client_UI
             pnlHand.Invalidate();
             pnlScore.Invalidate();
             RebuildOpponentPanels();
+
+            int requiredWidth = Math.Max(pnlBoardContainer.Width, _boardTiles.Count * (TILE_W + 4) + 40);
+            if (picBoard.Width != requiredWidth)
+            {
+                picBoard.Width = requiredWidth;
+            }
         }
 
         // ================================================================

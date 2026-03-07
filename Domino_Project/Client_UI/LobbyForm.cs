@@ -1,6 +1,3 @@
-// =====================================================================
-//  FILE: LobbyForm.cs  (Client_UI)
-// =====================================================================
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -15,24 +12,24 @@ namespace Client_UI
 {
     public class LobbyForm : Form
     {
-        // ── Networking ────────────────────────────────────────────────
+        //  Networking
         private readonly DominoClient _client;
         private readonly string _playerName;
 
-        // ── Pagination ────────────────────────────────────────────────
+        // Pagination 
         private List<RoomSummary> _allRooms = new();
         private Dictionary<string, Panel> _cards = new();
         private int _currentPage = 0;
         private const int PageSize = 6;
 
-        // ── UI controls ───────────────────────────────────────────────
+        // UI controls 
         private FlowLayoutPanel flowRooms;
         private Button btnNext, btnPrev, btnCreateRoom;
         private TextBox txtRoomName, txtMaxPlayers, txtScoreLimit;
         private Label lblStatus;
         private Panel pnlCreate;
 
-        // ── NEW: Waiting Room UI Controls ─────────────────────────────
+        // Waiting Room UI Controls
         private Panel pnlWaitingRoom;
         private ListBox lstPlayers;
         private Button btnStartGame;
@@ -52,9 +49,6 @@ namespace Client_UI
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        // ================================================================
-        //  UI LAYOUT
-        // ================================================================
         private void BuildUI()
         {
             Text = $"Domino Lobby  –  {_playerName}";
@@ -74,7 +68,6 @@ namespace Client_UI
             };
             Controls.Add(lblStatus);
 
-            // ── Left panel: Create Room ───────────────────────────────
             pnlCreate = new Panel
             {
                 Location = new Point(10, 35),
@@ -191,13 +184,8 @@ namespace Client_UI
             _ = _client.SendAsync(GameConstants.ActionJoinLobby);
         }
 
-        // ================================================================
-        //  SERVER MESSAGE HANDLER
-        // ================================================================
         private void OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            // 1. THE THREADING FIX: Force this entire method onto the main UI thread.
-            // If you don't do this, opening GameForm will silently crash.
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(() => OnMessageReceived(sender, e)));
@@ -259,9 +247,6 @@ namespace Client_UI
             }
         }
 
-        // ================================================================
-        //  ROOM CARDS & STATE TRANSITIONS
-        // ================================================================
         private void LoadRooms(List<RoomSummary> rooms)
         {
             _allRooms = rooms ?? new List<RoomSummary>();
@@ -369,7 +354,6 @@ namespace Client_UI
             return card;
         }
 
-        // ── UPDATE: Show Waiting Room State ──────────────────────────────
         private void ShowWaitingRoom(RoomStateResponse room)
         {
             flowRooms.Visible = false;
@@ -386,18 +370,15 @@ namespace Client_UI
             // Populate connected players
             if (room.ConnectedPlayers != null && room.ConnectedPlayers.Count > 0)
             {
-                // THE FIX: Check against the explicit OwnerName from the server
                 isOwner = (room.OwnerName == _playerName);
 
                 foreach (var player in room.ConnectedPlayers)
                 {
-                    // Assign the Host tag using the true owner name
                     string displayTag = (player == room.OwnerName) ? " (المضيف)" : "";
                     lstPlayers.Items.Add(player + displayTag);
                 }
             }
 
-            // Configure the Start button based on whether the current client is the owner
             if (isOwner)
             {
                 btnStartGame.Visible = true;
@@ -412,7 +393,6 @@ namespace Client_UI
             }
         }
 
-        // ── NEW: Return to Main Lobby State ───────────────────────────
         private void ReturnToLobbyView()
         {
             pnlWaitingRoom.Visible = false;
@@ -423,9 +403,6 @@ namespace Client_UI
             btnCreateRoom.Enabled = true;
         }
 
-        // ================================================================
-        //  ACTIONS
-        // ================================================================
         private async void BtnCreateRoom_Click(object sender, EventArgs e)
         {
             string name = txtRoomName.Text.Trim();
@@ -446,17 +423,14 @@ namespace Client_UI
         private async void WatchRoom(string roomId) =>
             await _client.SendAsync(GameConstants.ActionWatchRoom, new { RoomId = roomId });
 
-        // ── NEW: Start Game Request ───────────────────────────────────
         private async void BtnStartGame_Click(object sender, EventArgs e)
         {
             btnStartGame.Enabled = false;
-            btnStartGame.Text = "Waiting for others..."; // Better UX since both must ready up
+            btnStartGame.Text = "Waiting for others...";
 
-            // THE FIX: Use the shared constant so the server understands the command
             await _client.SendAsync(GameConstants.ActionReadyUp);
         }
 
-        // ── NEW: Leave Room Request ───────────────────────────────────
         private async void BtnLeaveRoom_Click(object sender, EventArgs e)
         {
             await _client.SendAsync(GameConstants.ActionLeaveRoom);
@@ -465,12 +439,6 @@ namespace Client_UI
             await _client.SendAsync(GameConstants.ActionJoinLobby);
         }
 
-        // ================================================================
-        //  OPEN GAME FORM
-        // ================================================================
-        // ================================================================
-        //  OPEN GAME FORM
-        // ================================================================
         private void OpenGameForm(PlayerHandResponse hand)
         {
             try
@@ -481,7 +449,6 @@ namespace Client_UI
                 {
                     this.Show();
                     ReturnToLobbyView();
-                    // Ask for fresh lobby data when returning
                     await _client.SendAsync(GameConstants.ActionJoinLobby);
                 };
 
@@ -497,7 +464,6 @@ namespace Client_UI
         }
         private void OpenSpectatorForm(WatcherJoinedResponse watcherData)
         {
-            // Ensure this runs on the main UI thread to prevent cross-thread operation exceptions
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(() => OpenSpectatorForm(watcherData)));
@@ -506,7 +472,6 @@ namespace Client_UI
 
             try
             {
-                // We will add this new constructor to GameController in the next step
                 var gf = new GameController(_client, _playerName, watcherData);
 
                 gf.FormClosed += async (s, e) =>
@@ -528,9 +493,6 @@ namespace Client_UI
             }
         }
 
-        // ================================================================
-        //  HELPERS
-        // ================================================================
         private static void AddLabel(Control parent, string text, int x, int y, float size, Color color)
         {
             parent.Controls.Add(new Label

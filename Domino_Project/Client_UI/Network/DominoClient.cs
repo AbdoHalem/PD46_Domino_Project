@@ -1,18 +1,3 @@
-// =====================================================================
-//  FILE: DominoClient.cs  (Client_UI/Network)
-//
-//  PURPOSE
-//  -------
-//  The entire TCP client networking layer was MISSING from the project.
-//  Login.cs had no click handler; Lobby.cs used a hardcoded test string.
-//
-//  This class:
-//  • Connects to the server via TCP.
-//  • Sends length-prefixed JSON messages (matching TcpCommServer protocol).
-//  • Reads incoming length-prefixed messages in a background Task.
-//  • Raises strongly-typed events so the UI forms can subscribe.
-//  • Marshals all event raises onto the UI thread automatically.
-// =====================================================================
 using System;
 using System.IO;
 using System.Net.Sockets;
@@ -34,15 +19,12 @@ namespace Client_UI.Network
 
     public class DominoClient : IDisposable
     {
-        // ── Connection ────────────────────────────────────────────────
         private TcpClient         _tcp;
         private NetworkStream     _stream;
         private CancellationTokenSource _cts;
 
-        // ── Thread sync for the UI ────────────────────────────────────
         private readonly Control _uiControl;
 
-        // ── Events ────────────────────────────────────────────────────
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
         public event EventHandler Disconnected;
 
@@ -53,7 +35,6 @@ namespace Client_UI.Network
             _uiControl = uiControl;
         }
 
-        // ── Connect ───────────────────────────────────────────────────
         public async Task<bool> ConnectAsync(string host, int port)
         {
             try
@@ -74,7 +55,6 @@ namespace Client_UI.Network
             }
         }
 
-        // ── Send (length-prefix + JSON) ───────────────────────────────
         public async Task SendAsync(string action, object payload = null)
         {
             if (!IsConnected) return;
@@ -93,7 +73,6 @@ namespace Client_UI.Network
             }
         }
 
-        // ── Receive loop (runs on background thread) ──────────────────
         private async Task ReceiveLoopAsync(CancellationToken ct)
         {
             byte[] lenBuf = new byte[4];
@@ -157,7 +136,6 @@ namespace Client_UI.Network
             }
         }
 
-        // ── Marshal onto the UI thread ────────────────────────────────
         private void RaiseOnUI(Action a)
         {
             if (_uiControl == null || _uiControl.IsDisposed) { a(); return; }
@@ -165,7 +143,6 @@ namespace Client_UI.Network
             else a();
         }
 
-        // ── Cleanup ───────────────────────────────────────────────────
         public void Disconnect()
         {
             _cts?.Cancel();
