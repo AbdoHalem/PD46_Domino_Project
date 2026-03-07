@@ -76,19 +76,20 @@ namespace Client_UI
             };
             Controls.Add(pnlCreate);
 
-            AddLabel(pnlCreate, "إنشاء غرفة جديدة", 8, 10, 22, Color.AntiqueWhite);
-            AddLabel(pnlCreate, ":اسم الغرفة", 215, 60, 14, Color.AntiqueWhite);
-            AddLabel(pnlCreate, ":عدد اللاعبين", 200, 110, 14, Color.AntiqueWhite);
-            AddLabel(pnlCreate, ":حد النقاط", 210, 160, 14, Color.AntiqueWhite);
+            // Left-aligned Labels and right-aligned TextBoxes for English LTR layout
+            AddLabel(pnlCreate, "Create New Room", 10, 10, 22, Color.AntiqueWhite);
+            AddLabel(pnlCreate, "Room Name:", 10, 65, 14, Color.AntiqueWhite);
+            AddLabel(pnlCreate, "Max Players:", 10, 115, 14, Color.AntiqueWhite);
+            AddLabel(pnlCreate, "Score Limit:", 10, 165, 14, Color.AntiqueWhite);
 
-            txtRoomName = AddTextBox(pnlCreate, 10, 65, "My Room", 190);
-            txtMaxPlayers = AddTextBox(pnlCreate, 10, 115, "2", 60);
-            txtScoreLimit = AddTextBox(pnlCreate, 10, 165, "100", 80);
+            txtRoomName = AddTextBox(pnlCreate, 140, 65, "My Room", 190);
+            txtMaxPlayers = AddTextBox(pnlCreate, 140, 115, "2", 60);
+            txtScoreLimit = AddTextBox(pnlCreate, 140, 165, "100", 80);
 
             btnCreateRoom = new Button
             {
-                Text = "إنشاء الغرفة",
-                Location = new Point(70, 220),
+                Text = "Create Room",
+                Location = new Point(80, 220),
                 Size = new Size(180, 48),
                 BackColor = Color.FromArgb(30, 110, 30),
                 ForeColor = Color.White,
@@ -99,13 +100,13 @@ namespace Client_UI
             pnlCreate.Controls.Add(btnCreateRoom);
 
             // ── Right panel: Room list ────────────────────────────────
-            AddLabel(this, "الغرف المتاحة", 1060, 10, 22, Color.AntiqueWhite);
+            AddLabel(this, "Available Rooms", 366, 22, 22, Color.AntiqueWhite);
 
             flowRooms = new FlowLayoutPanel
             {
-                Location = new Point(366, 35),
+                Location = new Point(366, 40),
                 Size = new Size(693, 592),
-                FlowDirection = FlowDirection.RightToLeft,
+                FlowDirection = FlowDirection.LeftToRight,
                 BackColor = Color.Transparent,
                 Padding = new Padding(5)
             };
@@ -116,8 +117,9 @@ namespace Client_UI
                 null, flowRooms, new object[] { true });
             Controls.Add(flowRooms);
 
-            btnNext = StyledBtn("التالي", new Point(1065, 587));
-            btnPrev = StyledBtn("السابق", new Point(253, 587));
+            btnPrev = StyledBtn("Previous", new Point(253, 587));
+            btnNext = StyledBtn("Next", new Point(1065, 587));
+
             btnNext.Click += (s, e) => { if ((_currentPage + 1) * PageSize < _allRooms.Count) { _currentPage++; RenderPage(); } };
             btnPrev.Click += (s, e) => { if (_currentPage > 0) { _currentPage--; RenderPage(); } };
             Controls.Add(btnNext);
@@ -126,7 +128,7 @@ namespace Client_UI
             // ── NEW: Waiting Room Panel (Hidden initially) ────────────
             pnlWaitingRoom = new Panel
             {
-                Location = new Point(366, 35),
+                Location = new Point(366, 40),
                 Size = new Size(693, 592),
                 BackColor = Color.FromArgb(20, 40, 20),
                 Visible = false
@@ -135,11 +137,11 @@ namespace Client_UI
 
             lblRoomTitle = new Label
             {
-                Text = "غرفة الانتظار",
+                Text = "Waiting Room",
                 ForeColor = Color.AntiqueWhite,
                 Font = new Font("Segoe UI", 22, FontStyle.Bold),
                 AutoSize = true,
-                Location = new Point(500, 15)
+                Location = new Point(250, 15) // Centered for LTR
             };
             pnlWaitingRoom.Controls.Add(lblRoomTitle);
 
@@ -150,13 +152,13 @@ namespace Client_UI
                 Font = new Font("Segoe UI", 16),
                 BackColor = Color.FromArgb(30, 50, 30),
                 ForeColor = Color.White,
-                RightToLeft = RightToLeft.Yes
+                RightToLeft = RightToLeft.No // Disabled RightToLeft
             };
             pnlWaitingRoom.Controls.Add(lstPlayers);
 
             btnStartGame = new Button
             {
-                Text = "بدء اللعبة",
+                Text = "Start Game",
                 Location = new Point(100, 70),
                 Size = new Size(200, 60),
                 BackColor = Color.FromArgb(30, 110, 30),
@@ -169,7 +171,7 @@ namespace Client_UI
 
             btnLeaveRoom = new Button
             {
-                Text = "مغادرة الغرفة",
+                Text = "Leave Room",
                 Location = new Point(100, 150),
                 Size = new Size(200, 60),
                 BackColor = Color.FromArgb(140, 30, 30),
@@ -294,18 +296,18 @@ namespace Client_UI
 
             card.Controls.Add(new Label
             {
-                Text = $"غرفة: {r.RoomName}",
+                Text = $"Room: {r.RoomName}",
                 AutoSize = true,
                 Font = new Font("Tahoma", 12, FontStyle.Bold),
                 ForeColor = Color.White,
                 BackColor = Color.Transparent,
-                Location = new Point(10, 10)
+                Location = new Point(10, 20)
             });
 
             card.Controls.Add(new Label
             {
                 Name = "lblCount",
-                Text = $"اللاعبين: {r.CurrentCount}/{r.MaxPlayers}",
+                Text = $"Players: {r.CurrentCount}/{r.MaxPlayers}",
                 AutoSize = true,
                 Font = new Font("Tahoma", 10),
                 ForeColor = Color.LightGray,
@@ -315,7 +317,7 @@ namespace Client_UI
 
             card.Controls.Add(new Label
             {
-                Text = running ? "اللعبة جارية" : "في الانتظار",
+                Text = running ? "Game in Progress" : "Waiting",
                 AutoSize = true,
                 Font = new Font("Tahoma", 9, FontStyle.Italic),
                 ForeColor = running ? Color.Gold : Color.LightGreen,
@@ -326,7 +328,7 @@ namespace Client_UI
             var btnJoin = new Button
             {
                 Name = "btnJoin",
-                Text = "انضمام",
+                Text = "Join",
                 Size = new Size(80, 35),
                 Location = new Point(10, 220),
                 Enabled = !isFull && !running,
@@ -340,7 +342,7 @@ namespace Client_UI
             var btnWatch = new Button
             {
                 Name = "btnWatch",
-                Text = "مشاهدة",
+                Text = "Watch",
                 Size = new Size(80, 35),
                 Location = new Point(120, 220),
                 Enabled = isFull || running,
@@ -362,7 +364,7 @@ namespace Client_UI
             pnlCreate.Visible = false;
             pnlWaitingRoom.Visible = true;
 
-            lblRoomTitle.Text = $"غرفة: {room.RoomName}";
+            lblRoomTitle.Text = $"Room: {room.RoomName}";
             lstPlayers.Items.Clear();
 
             bool isOwner = false;
@@ -374,7 +376,7 @@ namespace Client_UI
 
                 foreach (var player in room.ConnectedPlayers)
                 {
-                    string displayTag = (player == room.OwnerName) ? " (المضيف)" : "";
+                    string displayTag = (player == room.OwnerName) ? " (Host)" : "";
                     lstPlayers.Items.Add(player + displayTag);
                 }
             }
@@ -382,13 +384,13 @@ namespace Client_UI
             if (isOwner)
             {
                 btnStartGame.Visible = true;
-                btnStartGame.Text = "بدء اللعبة";
+                btnStartGame.Text = "Start Game";
                 btnStartGame.Enabled = (room.ConnectedPlayers != null && room.ConnectedPlayers.Count >= GameConstants.MinPlayersToStart);
             }
             else
             {
                 btnStartGame.Visible = true;
-                btnStartGame.Text = "في انتظار المضيف...";
+                btnStartGame.Text = "Waiting for Host...";
                 btnStartGame.Enabled = false;
             }
         }
