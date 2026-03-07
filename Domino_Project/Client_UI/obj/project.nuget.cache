@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "TVtJiTVbGYs=",
+  "dgSpecHash": "2QNf77LvOp4=",
   "success": true,
-  "projectFilePath": "C:\\Users\\oooam\\source\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
+  "projectFilePath": "D:\\ITI - PD\\Csharp\\PD46_Domino_Project\\Domino_Project\\Client_UI\\Client_UI.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\oooam\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.24\\microsoft.windowsdesktop.app.ref.8.0.24.nupkg.sha512",
-    "C:\\Users\\oooam\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.24\\microsoft.netcore.app.ref.8.0.24.nupkg.sha512",
-    "C:\\Users\\oooam\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.24\\microsoft.aspnetcore.app.ref.8.0.24.nupkg.sha512",
-    "C:\\Users\\oooam\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.24\\microsoft.netcore.app.host.win-x64.8.0.24.nupkg.sha512"
+    "C:\\Users\\ECC\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.24\\microsoft.windowsdesktop.app.ref.8.0.24.nupkg.sha512",
+    "C:\\Users\\ECC\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.24\\microsoft.netcore.app.ref.8.0.24.nupkg.sha512",
+    "C:\\Users\\ECC\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.24\\microsoft.aspnetcore.app.ref.8.0.24.nupkg.sha512",
+    "C:\\Users\\ECC\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.24\\microsoft.netcore.app.host.win-x64.8.0.24.nupkg.sha512"
   ],
   "logs": []
 }

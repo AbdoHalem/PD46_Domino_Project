@@ -12,8 +12,9 @@
       }
     ],
     "additionalProbingPaths": [
-      "C:\\Users\\oooam\\.dotnet\\store\\|arch|\\|tfm|",
-      "C:\\Users\\oooam\\.nuget\\packages",
+      "C:\\Users\\ECC\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\ECC\\.nuget\\packages",
+      "E:\\Dev express\\Components\\Offline Packages",
       "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
     ],
     "configProperties": {

@@ -47,6 +47,7 @@ namespace Client_UI
             _client.Disconnected += (s, e) =>
                 MessageBox.Show("Disconnected from server.", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MaximizeBox = false;
         }
 
         private void BuildUI()
@@ -390,7 +391,7 @@ namespace Client_UI
             else
             {
                 btnStartGame.Visible = true;
-                btnStartGame.Text = "Waiting for Host...";
+                btnStartGame.Text = "Waiting Host...";
                 btnStartGame.Enabled = false;
             }
         }
@@ -428,7 +429,7 @@ namespace Client_UI
         private async void BtnStartGame_Click(object sender, EventArgs e)
         {
             btnStartGame.Enabled = false;
-            btnStartGame.Text = "Waiting for others...";
+            btnStartGame.Text = "Waiting others...";
 
             await _client.SendAsync(GameConstants.ActionReadyUp);
         }
@@ -510,7 +511,7 @@ namespace Client_UI
 
         private static TextBox AddTextBox(Control parent, int x, int y, string defaultText, int width)
         {
-            var tb = new TextBox { Location = new Point(x, y), Size = new Size(width, 26), Text = defaultText };
+            var tb = new TextBox { Location = new Point(x, y), Size = new Size(width, 26), Text = defaultText, TextAlign = HorizontalAlignment.Center };
             parent.Controls.Add(tb);
             return tb;
         }
@@ -525,6 +526,19 @@ namespace Client_UI
             FlatStyle = FlatStyle.Flat,
             Font = new Font("Segoe UI", 12)
         };
+
+        private void InitializeComponent()
+        {
+            SuspendLayout();
+            // 
+            // LobbyForm
+            // 
+            ClientSize = new Size(282, 253);
+            MaximizeBox = false;
+            Name = "LobbyForm";
+            ResumeLayout(false);
+
+        }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {

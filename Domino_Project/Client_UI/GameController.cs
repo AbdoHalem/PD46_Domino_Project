@@ -25,43 +25,43 @@ namespace Client_UI
 {
     public class GameController : Form
     {
-        private readonly DominoClient        _client;
-        private readonly string              _playerName;
-        private readonly GameForm            _gameForm;
-        private          string              _currentRoomId;
+        private readonly DominoClient _client;
+        private readonly string _playerName;
+        private readonly GameForm _gameForm;
+        private string _currentRoomId;
 
         // Local mirror of board state (for watcher / reconnect)
-        private List<DominoTile> _board    = new();
-        private List<OtherPlayer> _others  = new();
-        private List<DominoTile> _myHand   = new();
-        private int    _boneyard           = 0;
-        private bool   _isMyTurn           = false;
-        private bool   _isWatcher          = false;
+        private List<DominoTile> _board = new();
+        private List<OtherPlayer> _others = new();
+        private List<DominoTile> _myHand = new();
+        private int _boneyard = 0;
+        private bool _isMyTurn = false;
+        private bool _isWatcher = false;
 
         public GameController(DominoClient client, string playerName,
                               PlayerHandResponse initialHand, bool isWatcher = false)
         {
-            _client      = client;
-            _playerName  = playerName;
-            _isWatcher   = isWatcher;
+            _client = client;
+            _playerName = playerName;
+            _isWatcher = isWatcher;
 
             // Host the GameForm inside this controller Form
             _gameForm = new GameForm();
-            _gameForm.TopLevel  = false;
+            _gameForm.TopLevel = false;
             _gameForm.FormBorderStyle = FormBorderStyle.None;
-            _gameForm.Dock      = DockStyle.Fill;
+            _gameForm.Dock = DockStyle.Fill;
             Controls.Add(_gameForm);
             _gameForm.Show();
 
             // Size this container to match GameForm
             ClientSize = _gameForm.Size;
-            Text       = $"Domino  –  {playerName}";
+            Text = $"Domino  –  {playerName}";
             FormBorderStyle = FormBorderStyle.Sizable;
 
             // ── Wire GameForm events → network calls ──────────────────
-            _gameForm.TilePlaced       += OnTilePlaced;
-            _gameForm.DrawRequested    += OnDrawRequested;
-            _gameForm.PassRequested    += OnPassRequested;
+            _gameForm.TilePlaced += OnTilePlaced;
+            _gameForm.DrawRequested += OnDrawRequested;
+            _gameForm.PassRequested += OnPassRequested;
             _gameForm.LeaveGameRequested += OnLeaveGame;
             _gameForm.NewGameRequested += OnNewGame;
 
@@ -74,8 +74,8 @@ namespace Client_UI
                 _myHand = initialHand.Hand
                     .Select(t => new DominoTile(t.Left, t.Right))
                     .ToList();
-                _boneyard  = initialHand.BoneyardCount;
-                _isMyTurn  = (initialHand.FirstTurn == playerName);
+                _boneyard = initialHand.BoneyardCount;
+                _isMyTurn = (initialHand.FirstTurn == playerName);
 
                 _gameForm.InitGame(playerName, _myHand, _others, _boneyard, _isWatcher);
                 UpdateTurnState();
@@ -137,80 +137,80 @@ namespace Client_UI
             try
             {
                 switch (e.Action)
-            {
-                // ── Opponent played a tile ────────────────────────────
-                case GameConstants.EventDominoPlayed:
-                    HandleDominoPlayed(e.Payload);
-                    break;
+                {
+                    // ── Opponent played a tile ────────────────────────────
+                    case GameConstants.EventDominoPlayed:
+                        HandleDominoPlayed(e.Payload);
+                        break;
 
-                // ── Server confirms OUR tile was placed ───────────────
-                // (We already drew it locally; just sync booleans)
+                    // ── Server confirms OUR tile was placed ───────────────
+                    // (We already drew it locally; just sync booleans)
 
-                // ── Server sends us a tile we just drew ───────────────
-                case GameConstants.EventTileDrawn:
-                    HandleTileDrawn(e.Payload);
-                    break;
+                    // ── Server sends us a tile we just drew ───────────────
+                    case GameConstants.EventTileDrawn:
+                        HandleTileDrawn(e.Payload);
+                        break;
 
-                // ── Somebody drew (public boneyard count update) ──────
-                case "DrawBroadcast":
-                    HandleDrawBroadcast(e.Payload);
-                    break;
+                    // ── Somebody drew (public boneyard count update) ──────
+                    case "DrawBroadcast":
+                        HandleDrawBroadcast(e.Payload);
+                        break;
 
-                // ── A player passed ───────────────────────────────────
-                case GameConstants.EventPlayerPassed:
-                    HandlePlayerPassed(e.Payload);
-                    break;
+                    // ── A player passed ───────────────────────────────────
+                    case GameConstants.EventPlayerPassed:
+                        HandlePlayerPassed(e.Payload);
+                        break;
 
-                // ── Turn changed (without a tile placement) ───────────
-                case GameConstants.EventTurnChanged:
-                    HandleTurnChanged(e.Payload);
-                    break;
+                    // ── Turn changed (without a tile placement) ───────────
+                    case GameConstants.EventTurnChanged:
+                        HandleTurnChanged(e.Payload);
+                        break;
 
-                // ── Round ended ───────────────────────────────────────
-                case GameConstants.EventRoundEnded:
-                    HandleRoundEnded(e.Payload);
-                    break;
+                    // ── Round ended ───────────────────────────────────────
+                    case GameConstants.EventRoundEnded:
+                        HandleRoundEnded(e.Payload);
+                        break;
                     // ── Server deals fresh hands for a new round ──────────
-                case GameConstants.EventTileDealt:
-                    HandleNewRoundDealt(e.Payload);
-                    break;
+                    case GameConstants.EventTileDealt:
+                        HandleNewRoundDealt(e.Payload);
+                        break;
                     // ── Game over ─────────────────────────────────────────
-                case GameConstants.EventGameOver:
-                HandleGameOver(e.Payload);
-                break;
+                    case GameConstants.EventGameOver:
+                        HandleGameOver(e.Payload);
+                        break;
 
                     // ── Player disconnected mid-game ──────────────────────
-                case GameConstants.EventPlayerLeft:
-                    var left = e.Payload.Deserialize<PlayerLeftResponse>(JsonOpts.Default);
-                    if (left != null)
-                    {
-                        if (left.GameAborted)
+                    case GameConstants.EventPlayerLeft:
+                        var left = e.Payload.Deserialize<PlayerLeftResponse>(JsonOpts.Default);
+                        if (left != null)
                         {
-                            MessageBox.Show("All other players left the game. The game has ended.",
-                                "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            Close(); // Close the game form and return to lobby
-                        }
-                        else
-                        {
-                            MessageBox.Show($"{left.Message}\n\nThe round will now restart.",
-                                "Player Left", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                            // Remove the player from the local UI state
-                            var opp = _others.FirstOrDefault(o => o.Name == left.PlayerName);
-                            if (opp != null)
+                            if (left.GameAborted)
                             {
-                                _others.Remove(opp);
+                                MessageBox.Show("All other players left the game. The game has ended.",
+                                    "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                Close(); // Close the game form and return to lobby
                             }
-                            // The UI will update automatically when the server sends EventTileDealt for the new round
+                            else
+                            {
+                                MessageBox.Show($"{left.Message}\n\nThe round will now restart.",
+                                    "Player Left", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                // Remove the player from the local UI state
+                                var opp = _others.FirstOrDefault(o => o.Name == left.PlayerName);
+                                if (opp != null)
+                                {
+                                    _others.Remove(opp);
+                                }
+                                // The UI will update automatically when the server sends EventTileDealt for the new round
+                            }
                         }
-                    }
-                    break;
+                        break;
 
                     case GameConstants.EventError:
-                    MessageBox.Show(e.Payload.GetString(), "Game Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    break;
-            }
+                        MessageBox.Show(e.Payload.GetString(), "Game Error",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        break;
+                }
             }
             catch (Exception ex)
             {
@@ -372,15 +372,20 @@ namespace Client_UI
         private async void OnTilePlaced(object sender, TilePlacedEventArgs e) =>
             await _client.SendAsync(GameConstants.ActionPlayDomino, new
             {
-                GameId      = _currentRoomId,
-                TileValue1  = e.Tile.Left,
-                TileValue2  = e.Tile.Right,
-                TargetEdge  = e.Side.ToString()
+                GameId = _currentRoomId,
+                TileValue1 = e.Tile.Left,
+                TileValue2 = e.Tile.Right,
+                TargetEdge = e.Side.ToString()
             });
 
         private async void OnDrawRequested(object sender, EventArgs e) =>
             await _client.SendAsync(GameConstants.ActionDrawTile,
                 new { GameId = _currentRoomId });
+
+        private void InitializeComponent()
+        {
+
+        }
 
         private async void OnPassRequested(object sender, EventArgs e) =>
             await _client.SendAsync(GameConstants.ActionPass,
